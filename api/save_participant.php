@@ -113,9 +113,12 @@ try {
     $db = new Database();
     $photoPath = null;
 
+
+
     // Handle photo upload
     if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = '../uploads/';
+        error_log('Processing photo upload...');
+        $uploadDir = $_SERVER['DOCUMENT_ROOT'] . '/uploads/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
@@ -132,12 +135,17 @@ try {
         $targetPath = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['photo']['tmp_name'], $targetPath)) {
-            // Resize image if needed
-            $resizedPath = $uploadDir . 'resized_' . $fileName;
-            if (resizeImage($targetPath, $resizedPath)) {
-                unlink($targetPath); // Remove original
-                $photoPath = 'uploads/resized_' . $fileName;
+            // Try to resize image if GD functions are available
+            if (function_exists('imagecreatefromjpeg')) {
+                $resizedPath = $uploadDir . 'resized_' . $fileName;
+                if (resizeImage($targetPath, $resizedPath)) {
+                    unlink($targetPath); // Remove original
+                    $photoPath = 'uploads/resized_' . $fileName;
+                } else {
+                    $photoPath = 'uploads/' . $fileName;
+                }
             } else {
+                // GD not available, use original image
                 $photoPath = 'uploads/' . $fileName;
             }
         } else {

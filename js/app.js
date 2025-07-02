@@ -150,7 +150,20 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            return response.text().then(text => {
+                console.log('Raw response:', text);
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('JSON parse error:', e);
+                    console.error('Response text:', text);
+                    throw new Error('Invalid JSON response: ' + text.substring(0, 100));
+                }
+            });
+        })
         .then(data => {
             if (data.success) {
                 // Store email in localStorage for future edits
@@ -165,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error saving participant:', error);
-            alert('Error saving participant data. Please try again.');
+            alert('Error saving participant data: ' + error.message);
         });
     }
 
@@ -261,6 +274,11 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select an image file.');
             return;
         }
+
+        // Create a new FileList with the dropped file and assign it to the input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        photoInput.files = dataTransfer.files;
 
         const reader = new FileReader();
         reader.onload = function(e) {
