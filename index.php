@@ -234,6 +234,7 @@ try {
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save</button>
                     <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                    <button type="button" id="deleteBtn" class="btn btn-danger" style="display: none;">Delete Profile</button>
                 </div>
             </form>
         </div>

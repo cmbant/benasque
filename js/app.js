@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('addEditModal');
     const closeBtn = document.querySelector('.close');
     const cancelBtn = document.getElementById('cancelBtn');
+    const deleteBtn = document.getElementById('deleteBtn');
     const participantForm = document.getElementById('participantForm');
     const sortSelect = document.getElementById('sortSelect');
     const filterInput = document.getElementById('filterInput');
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addEditBtn.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
+    deleteBtn.addEventListener('click', handleDeleteProfile);
 
     // Note: Removed click-outside-to-close behavior to prevent accidental closing
     // Modal now only closes via explicit button clicks (X, Cancel, or Save) or Escape key
@@ -76,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             isEditMode = false;
             modalTitle.textContent = 'Add Your Information';
             participantForm.reset();
+            deleteBtn.style.display = 'none';
         }
 
         modal.style.display = 'block';
@@ -94,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     isEditMode = true;
                     currentEmail = email;
                     modalTitle.textContent = 'Edit Your Information';
+                    deleteBtn.style.display = 'inline-block';
 
                     // Populate form with existing data
                     document.getElementById('firstName').value = data.participant.first_name;
@@ -129,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     isEditMode = false;
                     modalTitle.textContent = 'Add Your Information';
                     document.getElementById('email').disabled = false;
+                    deleteBtn.style.display = 'none';
                 }
             })
             .catch(error => {
@@ -136,6 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 isEditMode = false;
                 modalTitle.textContent = 'Add Your Information';
                 document.getElementById('email').disabled = false;
+                deleteBtn.style.display = 'none';
             });
     }
 
@@ -334,6 +340,56 @@ document.addEventListener('DOMContentLoaded', function() {
             blackboardContent.classList.add('active');
             addEditBtn.style.display = 'none';
         }
+    }
+
+    function handleDeleteProfile() {
+        if (!isEditMode || !currentEmail) {
+            alert('Error: No profile to delete');
+            return;
+        }
+
+        const confirmMessage = `Are you sure you want to delete your profile?\n\nThis action cannot be undone and will permanently remove:\n- Your personal information\n- Your photo\n- Your research interests\n- Your arXiv links\n\nType "DELETE" to confirm:`;
+
+        const confirmation = prompt(confirmMessage);
+
+        if (confirmation !== 'DELETE') {
+            return; // User cancelled or didn't type DELETE
+        }
+
+        // Show loading state
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = 'Deleting...';
+
+        const formData = new FormData();
+        formData.append('email', currentEmail);
+
+        fetch('api/delete_participant.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Clear localStorage
+                localStorage.removeItem('benasque25_email');
+
+                // Close modal and reload page
+                closeModal();
+                alert('Profile deleted successfully');
+                window.location.reload();
+            } else {
+                alert('Error deleting profile: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting profile:', error);
+            alert('Error deleting profile: ' + error.message);
+        })
+        .finally(() => {
+            // Reset button state
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = 'Delete Profile';
+        });
     }
 
     // Multi-select interests combobox functionality

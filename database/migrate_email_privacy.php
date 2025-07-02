@@ -1,9 +1,15 @@
 <?php
+
 /**
  * Migration script to add email_public column to existing databases
  */
 
-require_once '../database/Database.php';
+// Set the document root for CLI execution
+if (!isset($_SERVER['DOCUMENT_ROOT']) || empty($_SERVER['DOCUMENT_ROOT'])) {
+    $_SERVER['DOCUMENT_ROOT'] = dirname(__DIR__);
+}
+
+require_once 'Database.php';
 
 echo "=== Email Privacy Migration Script ===\n";
 echo "This script will add the email_public column to the participants table.\n\n";
@@ -11,11 +17,11 @@ echo "This script will add the email_public column to the participants table.\n\
 try {
     $db = new Database();
     $pdo = $db->getPDO();
-    
+
     // Check if email_public column already exists
     $stmt = $pdo->query("PRAGMA table_info(participants)");
     $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
+
     $hasEmailPublic = false;
     foreach ($columns as $column) {
         if ($column['name'] === 'email_public') {
@@ -23,7 +29,7 @@ try {
             break;
         }
     }
-    
+
     if (!$hasEmailPublic) {
         echo "Adding email_public column to participants table...\n";
         $pdo->exec("ALTER TABLE participants ADD COLUMN email_public INTEGER DEFAULT 0");
@@ -32,9 +38,8 @@ try {
     } else {
         echo "✓ Email privacy column already exists.\n";
     }
-    
+
     echo "\nMigration completed successfully!\n";
-    
 } catch (Exception $e) {
     echo "✗ Migration failed: " . $e->getMessage() . "\n";
     exit(1);

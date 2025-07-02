@@ -121,6 +121,16 @@ header h1 {
     transform: translateY(-2px);
 }
 
+.btn-danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+    transform: translateY(-2px);
+}
+
 /* Controls */
 .controls {
     display: flex;
