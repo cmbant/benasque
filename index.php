@@ -152,7 +152,8 @@ try {
         <div id="blackboardContent" class="tab-content">
             <div class="iframe-container">
                 <iframe
-                    src="<?= htmlspecialchars($config['virtual_blackboard_url']) ?>"
+                    id="blackboardIframe"
+                    data-src="<?= htmlspecialchars($config['virtual_blackboard_url']) ?>"
                     frameborder="0"
                     allowfullscreen>
                 </iframe>

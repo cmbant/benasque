@@ -148,6 +148,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFormSubmit(event) {
         event.preventDefault();
 
+        // Get the submit button and show loading state
+        const submitBtn = participantForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
         // Temporarily enable email field if disabled for form submission
         const emailField = document.getElementById('email');
         const wasDisabled = emailField.disabled;
@@ -206,6 +212,11 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error saving participant:', error);
             alert('Error saving participant data: ' + error.message);
+        })
+        .finally(() => {
+            // Restore button state (only if page isn't reloading)
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         });
     }
 
@@ -339,6 +350,12 @@ document.addEventListener('DOMContentLoaded', function() {
             blackboardTab.classList.add('active');
             blackboardContent.classList.add('active');
             addEditBtn.style.display = 'none';
+
+            // Lazy load the iframe content when first accessed
+            const iframe = document.getElementById('blackboardIframe');
+            if (iframe && !iframe.src && iframe.dataset.src) {
+                iframe.src = iframe.dataset.src;
+            }
         }
     }
 

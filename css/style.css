@@ -131,6 +131,16 @@ header h1 {
     transform: translateY(-2px);
 }
 
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn:disabled:hover {
+    transform: none !important;
+}
+
 /* Controls */
 .controls {
     display: flex;
