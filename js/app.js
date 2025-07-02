@@ -68,12 +68,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function openModal() {
         // Check if user has an existing entry
-        const userEmail = localStorage.getItem('benasque25_email');
+        const userEmail = getUserEmail();
 
         if (userEmail) {
+            console.log('Found stored email for editing:', userEmail);
             // Try to load existing data for editing
             loadExistingData(userEmail);
         } else {
+            console.log('No stored email found, checking if user wants to edit existing profile');
+            // Ask user if they want to edit an existing profile
+            const wantToEdit = confirm('Do you want to edit an existing profile?\n\nClick "OK" to enter your email and edit your existing profile.\nClick "Cancel" to create a new profile.');
+
+            if (wantToEdit) {
+                const email = prompt('Please enter the email address you used when creating your profile:');
+                if (email && email.trim()) {
+                    const trimmedEmail = email.trim();
+                    console.log('User provided email for editing:', trimmedEmail);
+                    loadExistingData(trimmedEmail);
+                    modal.style.display = 'block';
+                    return;
+                }
+            }
+
             // New entry mode
             isEditMode = false;
             modalTitle.textContent = 'Add Your Information';
@@ -82,6 +98,37 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         modal.style.display = 'block';
+    }
+
+    function getUserEmail() {
+        try {
+            return localStorage.getItem('benasque25_email');
+        } catch (e) {
+            console.warn('localStorage not available:', e);
+            return null;
+        }
+    }
+
+    function storeUserEmail(email) {
+        try {
+            localStorage.setItem('benasque25_email', email);
+            console.log('Stored email for future editing:', email);
+            return true;
+        } catch (e) {
+            console.warn('Failed to store email in localStorage:', e);
+            return false;
+        }
+    }
+
+    function clearUserEmail() {
+        try {
+            localStorage.removeItem('benasque25_email');
+            console.log('Cleared stored email');
+            return true;
+        } catch (e) {
+            console.warn('Failed to clear email from localStorage:', e);
+            return false;
+        }
     }
 
     function closeModal() {
@@ -98,6 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentEmail = email;
                     modalTitle.textContent = 'Edit Your Information';
                     deleteBtn.style.display = 'inline-block';
+
+                    // Store email for future sessions (in case it was manually entered)
+                    storeUserEmail(email);
 
                     // Populate form with existing data
                     document.getElementById('firstName').value = data.participant.first_name;
@@ -199,8 +249,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(data => {
             if (data.success) {
-                // Store email in localStorage for future edits
-                localStorage.setItem('benasque25_email', formData.get('email'));
+                // Store email for future edits
+                storeUserEmail(formData.get('email'));
 
                 // Close modal and reload page
                 closeModal();
@@ -387,8 +437,8 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Clear localStorage
-                localStorage.removeItem('benasque25_email');
+                // Clear stored email
+                clearUserEmail();
 
                 // Close modal and reload page
                 closeModal();
