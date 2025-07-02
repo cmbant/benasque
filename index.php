@@ -180,8 +180,8 @@ try {
                     <label for="email">Email *</label>
                     <input type="email" id="email" name="email" required>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="emailPublic" name="email_public" value="1">
-                        <label for="emailPublic">Make email visible in my public profile</label>
+                        <input type="checkbox" id="emailPublic" name="email_public" value="1" checked>
+                        <label for="emailPublic">Show on profile</label>
                     </div>
                     <small>Used to identify your entry for future edits</small>
                 </div>

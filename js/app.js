@@ -402,28 +402,48 @@ document.addEventListener('DOMContentLoaded', function() {
 
         let selectedInterests = [];
 
+        let blurTimeout = null;
+
         // Show/hide dropdown
         searchInput.addEventListener('focus', () => {
+            // Clear any pending blur timeout
+            if (blurTimeout) {
+                clearTimeout(blurTimeout);
+                blurTimeout = null;
+            }
             dropdown.style.display = 'block';
             filterDropdownItems();
         });
 
         searchInput.addEventListener('blur', () => {
             // Delay hiding to allow clicking on dropdown items
-            setTimeout(() => {
+            blurTimeout = setTimeout(() => {
                 dropdown.style.display = 'none';
+                blurTimeout = null;
             }, 200);
         });
 
         // Filter dropdown items based on search
-        searchInput.addEventListener('input', filterDropdownItems);
+        searchInput.addEventListener('input', () => {
+            dropdown.style.display = 'block';
+            filterDropdownItems();
+        });
 
         // Handle dropdown item clicks
         dropdownItems.forEach(item => {
             item.addEventListener('click', () => {
+                // Clear blur timeout to prevent dropdown from hiding
+                if (blurTimeout) {
+                    clearTimeout(blurTimeout);
+                    blurTimeout = null;
+                }
+
                 const value = item.dataset.value;
                 addInterest(value);
                 searchInput.value = '';
+
+                // Keep dropdown open and focused for next selection
+                dropdown.style.display = 'block';
                 searchInput.focus();
                 filterDropdownItems();
             });

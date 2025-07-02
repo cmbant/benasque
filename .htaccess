@@ -1,13 +1,5 @@
 RewriteEngine On
 
-# Enable error reporting for development
-php_flag display_errors On
-php_value error_reporting E_ALL
-
-# Security headers
-Header always set X-Content-Type-Options nosniff
-Header always set X-Frame-Options DENY
-Header always set X-XSS-Protection "1; mode=block"
 
 <FilesMatch "^\.htaccess|^\.(?!well-known)|.*\.(git|env|log|ini|conf|config|bak|backup|old|tmp|temp|md|ps1|py)$">
     Require all denied
