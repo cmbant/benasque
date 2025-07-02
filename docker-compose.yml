@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  web:
+    image: php:8.1-apache
+    container_name: benasque25-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    command: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y libsqlite3-dev sqlite3 libgd-dev &&
+        docker-php-ext-install pdo pdo_sqlite gd &&
+        a2enmod rewrite headers &&
+        chown -R www-data:www-data /var/www/html &&
+        chmod -R 755 /var/www/html &&
+        chmod -R 777 /var/www/html/database /var/www/html/uploads &&
+        apache2-foreground
+      "
+    restart: unless-stopped

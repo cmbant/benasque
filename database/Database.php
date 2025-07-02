@@ -1,0 +1,110 @@
+<?php
+
+class Database
+{
+    private $pdo;
+    private $dbPath;
+
+    public function __construct($dbPath = null)
+    {
+        if ($dbPath === null) {
+            // Use absolute path from document root
+            $this->dbPath = $_SERVER['DOCUMENT_ROOT'] . '/database/benasque25.db';
+        } else {
+            $this->dbPath = $dbPath;
+        }
+        $this->connect();
+        $this->initializeSchema();
+    }
+
+    private function connect()
+    {
+        try {
+            $this->pdo = new PDO("sqlite:" . $this->dbPath);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            throw new Exception("Database connection failed: " . $e->getMessage());
+        }
+    }
+
+    private function initializeSchema()
+    {
+        $sqlPath = $_SERVER['DOCUMENT_ROOT'] . '/database/init.sql';
+        $sql = file_get_contents($sqlPath);
+        $this->pdo->exec($sql);
+    }
+
+    public function getPDO()
+    {
+        return $this->pdo;
+    }
+
+    public function getAllParticipants()
+    {
+        $stmt = $this->pdo->query("SELECT * FROM participants ORDER BY first_name, last_name");
+        return $stmt->fetchAll();
+    }
+
+    public function getParticipantByEmail($email)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM participants WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetch();
+    }
+
+    public function addParticipant($data)
+    {
+        $sql = "INSERT INTO participants (first_name, last_name, email, interests, description, arxiv_links, photo_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            $data['first_name'],
+            $data['last_name'],
+            $data['email'],
+            $data['interests'],
+            $data['description'],
+            $data['arxiv_links'],
+            $data['photo_path'] ?? null
+        ]);
+    }
+
+    public function updateParticipant($email, $data)
+    {
+        $sql = "UPDATE participants SET first_name = ?, last_name = ?, interests = ?,
+                description = ?, arxiv_links = ?, photo_path = ? WHERE email = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            $data['first_name'],
+            $data['last_name'],
+            $data['interests'],
+            $data['description'],
+            $data['arxiv_links'],
+            $data['photo_path'],
+            $email
+        ]);
+    }
+
+    public function deleteParticipant($email)
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM participants WHERE email = ?");
+        return $stmt->execute([$email]);
+    }
+
+    public function getAllInterests()
+    {
+        $stmt = $this->pdo->query("SELECT interests FROM participants WHERE interests IS NOT NULL AND interests != ''");
+        $allInterests = [];
+        while ($row = $stmt->fetch()) {
+            $interests = explode(',', $row['interests']);
+            foreach ($interests as $interest) {
+                $interest = trim($interest);
+                if ($interest && !in_array($interest, $allInterests)) {
+                    $allInterests[] = $interest;
+                }
+            }
+        }
+        sort($allInterests);
+        return $allInterests;
+    }
+}
