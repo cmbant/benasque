@@ -61,6 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Photo upload functionality
     setupPhotoUpload();
 
+    // Multi-select interests functionality
+    setupInterestsCombobox();
+
     function openModal() {
         // Check if user has an existing entry
         const userEmail = localStorage.getItem('benasque25_email');
@@ -96,8 +99,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('firstName').value = data.participant.first_name;
                     document.getElementById('lastName').value = data.participant.last_name;
                     document.getElementById('email').value = data.participant.email;
-                    document.getElementById('interests').value = data.participant.interests || '';
+                    document.getElementById('emailPublic').checked = data.participant.email_public == 1;
                     document.getElementById('description').value = data.participant.description || '';
+
+                    // Set interests using the new combobox
+                    if (window.setSelectedInterests) {
+                        window.setSelectedInterests(data.participant.interests || '');
+                    }
 
                     // Handle arXiv links
                     if (data.participant.arxiv_links) {
@@ -326,6 +334,125 @@ document.addEventListener('DOMContentLoaded', function() {
             blackboardContent.classList.add('active');
             addEditBtn.style.display = 'none';
         }
+    }
+
+    // Multi-select interests combobox functionality
+    function setupInterestsCombobox() {
+        const searchInput = document.getElementById('interestSearch');
+        const dropdown = document.getElementById('interestDropdown');
+        const selectedTags = document.getElementById('selectedTags');
+        const hiddenInput = document.getElementById('interests');
+        const dropdownItems = dropdown.querySelectorAll('.dropdown-item');
+
+        let selectedInterests = [];
+
+        // Show/hide dropdown
+        searchInput.addEventListener('focus', () => {
+            dropdown.style.display = 'block';
+            filterDropdownItems();
+        });
+
+        searchInput.addEventListener('blur', () => {
+            // Delay hiding to allow clicking on dropdown items
+            setTimeout(() => {
+                dropdown.style.display = 'none';
+            }, 200);
+        });
+
+        // Filter dropdown items based on search
+        searchInput.addEventListener('input', filterDropdownItems);
+
+        // Handle dropdown item clicks
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.dataset.value;
+                addInterest(value);
+                searchInput.value = '';
+                searchInput.focus();
+                filterDropdownItems();
+            });
+        });
+
+        // Handle Enter key to add custom interest
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const value = searchInput.value.trim();
+                if (value) {
+                    addInterest(value);
+                    searchInput.value = '';
+                    filterDropdownItems();
+                }
+            }
+        });
+
+        function filterDropdownItems() {
+            const searchTerm = searchInput.value.toLowerCase();
+            dropdownItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                const value = item.dataset.value;
+                const isSelected = selectedInterests.includes(value);
+                const matches = text.includes(searchTerm);
+
+                if (isSelected) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+
+                if (matches && !isSelected) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        function addInterest(value) {
+            if (!selectedInterests.includes(value)) {
+                selectedInterests.push(value);
+                updateTagsDisplay();
+                updateHiddenInput();
+            }
+        }
+
+        function removeInterest(value) {
+            selectedInterests = selectedInterests.filter(interest => interest !== value);
+            updateTagsDisplay();
+            updateHiddenInput();
+            filterDropdownItems();
+        }
+
+        function updateTagsDisplay() {
+            selectedTags.innerHTML = '';
+            selectedInterests.forEach(interest => {
+                const tag = document.createElement('div');
+                tag.className = 'tag';
+                tag.innerHTML = `
+                    <span>${interest}</span>
+                    <span class="remove" data-value="${interest}">&times;</span>
+                `;
+
+                tag.querySelector('.remove').addEventListener('click', () => {
+                    removeInterest(interest);
+                });
+
+                selectedTags.appendChild(tag);
+            });
+        }
+
+        function updateHiddenInput() {
+            hiddenInput.value = selectedInterests.join(', ');
+        }
+
+        // Public method to set interests (for editing)
+        window.setSelectedInterests = function(interestsString) {
+            selectedInterests = interestsString ?
+                interestsString.split(',').map(s => s.trim()).filter(s => s) : [];
+            updateTagsDisplay();
+            updateHiddenInput();
+            filterDropdownItems();
+        };
     }
 
     // Initialize sorting

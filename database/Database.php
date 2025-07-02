@@ -55,13 +55,14 @@ class Database
 
     public function addParticipant($data)
     {
-        $sql = "INSERT INTO participants (first_name, last_name, email, interests, description, arxiv_links, photo_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO participants (first_name, last_name, email, email_public, interests, description, arxiv_links, photo_path)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $data['first_name'],
             $data['last_name'],
             $data['email'],
+            $data['email_public'] ?? 0,
             $data['interests'],
             $data['description'],
             $data['arxiv_links'],
@@ -71,12 +72,13 @@ class Database
 
     public function updateParticipant($email, $data)
     {
-        $sql = "UPDATE participants SET first_name = ?, last_name = ?, interests = ?,
+        $sql = "UPDATE participants SET first_name = ?, last_name = ?, email_public = ?, interests = ?,
                 description = ?, arxiv_links = ?, photo_path = ? WHERE email = ?";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $data['first_name'],
             $data['last_name'],
+            $data['email_public'] ?? 0,
             $data['interests'],
             $data['description'],
             $data['arxiv_links'],

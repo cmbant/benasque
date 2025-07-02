@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS participants (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
+    email_public INTEGER DEFAULT 0, -- 0 = private, 1 = public
     interests TEXT, -- Comma-separated keywords
     description TEXT, -- General description/comments
     arxiv_links TEXT, -- JSON array of arXiv objects with url and title fields

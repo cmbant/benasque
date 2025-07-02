@@ -84,6 +84,13 @@ try {
                         <div class="participant-info">
                             <h3><?= htmlspecialchars($participant['first_name'] . ' ' . $participant['last_name']) ?></h3>
 
+                            <?php if ($participant['email_public'] == 1): ?>
+                                <div class="email">
+                                    <strong>Email:</strong>
+                                    <a href="mailto:<?= htmlspecialchars($participant['email']) ?>"><?= htmlspecialchars($participant['email']) ?></a>
+                                </div>
+                            <?php endif; ?>
+
                             <?php if ($participant['interests']): ?>
                                 <div class="interests">
                                     <strong>Interests:</strong>
@@ -172,17 +179,30 @@ try {
                 <div class="form-group">
                     <label for="email">Email *</label>
                     <input type="email" id="email" name="email" required>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="emailPublic" name="email_public" value="1">
+                        <label for="emailPublic">Make email visible in my public profile</label>
+                    </div>
                     <small>Used to identify your entry for future edits</small>
                 </div>
 
                 <div class="form-group">
                     <label for="interests">Research Interests</label>
-                    <input type="text" id="interests" name="interests" placeholder="Comma-separated keywords" list="interestsList">
-                    <datalist id="interestsList">
-                        <?php foreach ($allInterests as $interest): ?>
-                            <option value="<?= htmlspecialchars($interest) ?>">
-                            <?php endforeach; ?>
-                    </datalist>
+                    <div class="multi-select-container">
+                        <div class="selected-tags" id="selectedTags"></div>
+                        <div class="combobox-wrapper">
+                            <input type="text" id="interestSearch" placeholder="Type to search and add keywords..." autocomplete="off">
+                            <div class="dropdown-list" id="interestDropdown">
+                                <?php foreach ($allInterests as $interest): ?>
+                                    <div class="dropdown-item" data-value="<?= htmlspecialchars($interest) ?>">
+                                        <?= htmlspecialchars($interest) ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="interests" name="interests">
+                    <small>Click on suggestions or type new keywords. Selected keywords appear as tags above.</small>
                 </div>
 
                 <div class="form-group">

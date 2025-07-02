@@ -89,6 +89,7 @@ try {
     $firstName = trim($_POST['first_name']);
     $lastName = trim($_POST['last_name']);
     $email = filter_var(trim($_POST['email']), FILTER_VALIDATE_EMAIL);
+    $emailPublic = isset($_POST['email_public']) && $_POST['email_public'] === '1' ? 1 : 0;
     $interests = trim($_POST['interests'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $arxivLinks = $_POST['arxiv_links'] ?? '[]';
@@ -167,6 +168,7 @@ try {
         'first_name' => $firstName,
         'last_name' => $lastName,
         'email' => $email,
+        'email_public' => $emailPublic,
         'interests' => $interests,
         'description' => $description,
         'arxiv_links' => $arxivLinks,
