@@ -68,6 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Multi-select interests functionality
     setupInterestsCombobox();
 
+    // Talks section functionality
+    setupTalksSection();
+
     function openModal() {
         // Check if user has an existing entry
         const userEmail = getUserEmail();
@@ -173,6 +176,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             return ''; // Invalid entry
                         }).filter(url => url.trim() !== '');
                         document.getElementById('arxivLinks').value = urlList.join('\n');
+                    }
+
+                    // Handle talks data
+                    document.getElementById('talkFlash').checked = data.participant.talk_flash == 1;
+                    document.getElementById('talkContributed').checked = data.participant.talk_contributed == 1;
+                    document.getElementById('talkTitle').value = data.participant.talk_title || '';
+                    document.getElementById('talkAbstract').value = data.participant.talk_abstract || '';
+
+                    // Show/hide contributed talk details based on checkbox state
+                    const contributedTalkDetails = document.getElementById('contributedTalkDetails');
+                    if (data.participant.talk_contributed == 1) {
+                        contributedTalkDetails.style.display = 'block';
+                    } else {
+                        contributedTalkDetails.style.display = 'none';
                     }
 
                     // Disable email field in edit mode
@@ -606,6 +623,41 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     }
 
+    function setupTalksSection() {
+        const talkContributedCheckbox = document.getElementById('talkContributed');
+        const contributedTalkDetails = document.getElementById('contributedTalkDetails');
+
+        if (talkContributedCheckbox && contributedTalkDetails) {
+            talkContributedCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    contributedTalkDetails.style.display = 'block';
+                } else {
+                    contributedTalkDetails.style.display = 'none';
+                    // Clear the fields when hiding
+                    document.getElementById('talkTitle').value = '';
+                    document.getElementById('talkAbstract').value = '';
+                }
+            });
+        }
+    }
+
+    // Check for signup URL parameter
+    function checkSignupParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('signup') === '1' || urlParams.get('add') === '1') {
+            // Small delay to ensure DOM is ready
+            setTimeout(() => {
+                openModal();
+                // Clean up URL without reloading page
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }, 100);
+        }
+    }
+
     // Initialize sorting
     sortParticipants();
+
+    // Check for signup parameter
+    checkSignupParam();
 });

@@ -96,6 +96,12 @@ try {
     $isEdit = isset($_POST['is_edit']) && $_POST['is_edit'] === '1';
     $originalEmail = $_POST['original_email'] ?? null;
 
+    // Talk-related fields
+    $talkFlash = isset($_POST['talk_flash']) && $_POST['talk_flash'] === '1' ? 1 : 0;
+    $talkContributed = isset($_POST['talk_contributed']) && $_POST['talk_contributed'] === '1' ? 1 : 0;
+    $talkTitle = trim($_POST['talk_title'] ?? '');
+    $talkAbstract = trim($_POST['talk_abstract'] ?? '');
+
     if (!$email) {
         throw new Exception('Invalid email format');
     }
@@ -172,7 +178,11 @@ try {
         'interests' => $interests,
         'description' => $description,
         'arxiv_links' => $arxivLinks,
-        'photo_path' => $photoPath
+        'photo_path' => $photoPath,
+        'talk_flash' => $talkFlash,
+        'talk_contributed' => $talkContributed,
+        'talk_title' => $talkTitle,
+        'talk_abstract' => $talkAbstract
     ];
 
     if ($isEdit && $originalEmail) {

@@ -110,7 +110,7 @@ try {
 
                             <?php if ($participant['description']): ?>
                                 <div class="description">
-                                    <strong>About:</strong>
+                                    <strong>General info:</strong>
                                     <p><?= nl2br(htmlspecialchars($participant['description'])) ?></p>
                                 </div>
                             <?php endif; ?>
@@ -208,7 +208,7 @@ try {
                 </div>
 
                 <div class="form-group">
-                    <label for="description">General Description</label>
+                    <label for="description">General info</label>
                     <textarea id="description" name="description" rows="3" placeholder="Tell us about your research, background, or anything else you'd like to share..."></textarea>
                 </div>
 
@@ -230,6 +230,35 @@ try {
                     <div id="photoPreview" class="photo-preview" style="display: none;">
                         <img id="previewImage" src="" alt="Preview">
                         <button type="button" id="removePhoto" class="remove-photo">Remove</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Talks</label>
+                    <div class="talks-section">
+                        <p class="info-text">There are flash talks (2+1 min) and a limited number of longer contributed talks (15+5 min). Please indicate the type(s) of talk you'd like to be considered for. If you select both, we'll consider your submission for a longer talk first, and flash talk as second choice.</p>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="talkFlash" name="talk_flash" value="1">
+                            <label for="talkFlash">Flash talk (2+1 min)</label>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="talkContributed" name="talk_contributed" value="1">
+                            <label for="talkContributed">Contributed talk (15+5 min)</label>
+                        </div>
+
+                        <div id="contributedTalkDetails" class="contributed-talk-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="talkTitle">Talk Title</label>
+                                <input type="text" id="talkTitle" name="talk_title" placeholder="Enter your talk title">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="talkAbstract">Short Abstract</label>
+                                <textarea id="talkAbstract" name="talk_abstract" rows="4" placeholder="Enter a short abstract for your talk"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

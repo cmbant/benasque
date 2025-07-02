@@ -10,6 +10,12 @@ CREATE TABLE IF NOT EXISTS participants (
     description TEXT, -- General description/comments
     arxiv_links TEXT, -- JSON array of arXiv objects with url and title fields
     photo_path TEXT,
+    talk_flash INTEGER DEFAULT 0, -- 0 = no, 1 = yes (flash talk 2+1 min)
+    talk_contributed INTEGER DEFAULT 0, -- 0 = no, 1 = yes (contributed talk 15+5 min)
+    talk_title TEXT, -- Title for contributed talk
+    talk_abstract TEXT, -- Abstract for contributed talk
+    talk_flash_accepted INTEGER DEFAULT 1, -- Flash talks are always accepted
+    talk_contributed_accepted INTEGER DEFAULT NULL, -- NULL = pending, 0 = rejected, 1 = accepted
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

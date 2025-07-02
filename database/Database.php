@@ -74,8 +74,8 @@ class Database
 
     public function addParticipant($data)
     {
-        $sql = "INSERT INTO participants (first_name, last_name, email, email_public, interests, description, arxiv_links, photo_path)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO participants (first_name, last_name, email, email_public, interests, description, arxiv_links, photo_path, talk_flash, talk_contributed, talk_title, talk_abstract, talk_flash_accepted, talk_contributed_accepted)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $data['first_name'],
@@ -85,14 +85,33 @@ class Database
             $data['interests'],
             $data['description'],
             $data['arxiv_links'],
-            $data['photo_path'] ?? null
+            $data['photo_path'] ?? null,
+            $data['talk_flash'] ?? 0,
+            $data['talk_contributed'] ?? 0,
+            $data['talk_title'] ?? null,
+            $data['talk_abstract'] ?? null,
+            $data['talk_flash'] ?? 0 ? 1 : 0, // Flash talks are always accepted if submitted
+            null  // Contributed talks start as pending
         ]);
     }
 
     public function updateParticipant($email, $data)
     {
+        // Get current acceptance status to preserve admin decisions
+        $current = $this->getParticipantByEmail($email);
+        $currentContribAccepted = $current['talk_contributed_accepted'] ?? null;
+
+        // Flash talks are always accepted if submitted, rejected if removed
+        $flashAccepted = ($data['talk_flash'] ?? 0) ? 1 : 0;
+
+        // Contributed talks preserve admin decisions, set to pending if newly added
+        $contribAccepted = ($data['talk_contributed'] ?? 0) ? $currentContribAccepted : null;
+        if (($data['talk_contributed'] ?? 0) && !($current['talk_contributed'] ?? 0)) {
+            $contribAccepted = null; // New contributed talk starts as pending
+        }
+
         $sql = "UPDATE participants SET first_name = ?, last_name = ?, email_public = ?, interests = ?,
-                description = ?, arxiv_links = ?, photo_path = ? WHERE email = ?";
+                description = ?, arxiv_links = ?, photo_path = ?, talk_flash = ?, talk_contributed = ?, talk_title = ?, talk_abstract = ?, talk_flash_accepted = ?, talk_contributed_accepted = ? WHERE email = ?";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
             $data['first_name'],
@@ -102,6 +121,12 @@ class Database
             $data['description'],
             $data['arxiv_links'],
             $data['photo_path'],
+            $data['talk_flash'] ?? 0,
+            $data['talk_contributed'] ?? 0,
+            $data['talk_title'] ?? null,
+            $data['talk_abstract'] ?? null,
+            $flashAccepted,
+            $contribAccepted,
             $email
         ]);
     }
