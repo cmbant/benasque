@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancelBtn');
     const deleteBtn = document.getElementById('deleteBtn');
     const participantForm = document.getElementById('participantForm');
+    const recoverProfileLink = document.getElementById('recoverProfileLink');
     const sortSelect = document.getElementById('sortSelect');
     const filterInput = document.getElementById('filterInput');
     const interestFilter = document.getElementById('interestFilter');
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function() {
     closeBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
     deleteBtn.addEventListener('click', handleDeleteProfile);
+    recoverProfileLink.addEventListener('click', handleRecoverProfile);
 
     // Note: Removed click-outside-to-close behavior to prevent accidental closing
     // Modal now only closes via explicit button clicks (X, Cancel, or Save) or Escape key
@@ -75,22 +77,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Try to load existing data for editing
             loadExistingData(userEmail);
         } else {
-            console.log('No stored email found, checking if user wants to edit existing profile');
-            // Ask user if they want to edit an existing profile
-            const wantToEdit = confirm('Do you want to edit an existing profile?\n\nClick "OK" to enter your email and edit your existing profile.\nClick "Cancel" to create a new profile.');
-
-            if (wantToEdit) {
-                const email = prompt('Please enter the email address you used when creating your profile:');
-                if (email && email.trim()) {
-                    const trimmedEmail = email.trim();
-                    console.log('User provided email for editing:', trimmedEmail);
-                    loadExistingData(trimmedEmail);
-                    modal.style.display = 'block';
-                    return;
-                }
-            }
-
-            // New entry mode
+            console.log('No stored email found, opening in add mode');
+            // New entry mode - load empty by default
             isEditMode = false;
             modalTitle.textContent = 'Add Your Information';
             participantForm.reset();
@@ -134,6 +122,17 @@ document.addEventListener('DOMContentLoaded', function() {
     function closeModal() {
         modal.style.display = 'none';
         participantForm.reset();
+    }
+
+    function handleRecoverProfile(event) {
+        event.preventDefault();
+
+        const email = prompt('Please enter the email address you used when creating your profile:');
+        if (email && email.trim()) {
+            const trimmedEmail = email.trim();
+            console.log('User provided email for profile recovery:', trimmedEmail);
+            loadExistingData(trimmedEmail);
+        }
     }
 
     function loadExistingData(email) {
@@ -274,11 +273,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const sortBy = sortSelect.value;
         const cards = Array.from(participantsList.children);
 
-        cards.sort((a, b) => {
-            const aValue = a.dataset[sortBy === 'first_name' ? 'firstName' : 'lastName'].toLowerCase();
-            const bValue = b.dataset[sortBy === 'first_name' ? 'firstName' : 'lastName'].toLowerCase();
-            return aValue.localeCompare(bValue);
-        });
+        if (sortBy === 'random') {
+            // Fisher-Yates shuffle algorithm for true randomization
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+        } else {
+            // Alphabetical sorting
+            cards.sort((a, b) => {
+                const aValue = a.dataset[sortBy === 'first_name' ? 'firstName' : 'lastName'].toLowerCase();
+                const bValue = b.dataset[sortBy === 'first_name' ? 'firstName' : 'lastName'].toLowerCase();
+                return aValue.localeCompare(bValue);
+            });
+        }
 
         // Re-append sorted cards
         cards.forEach(card => participantsList.appendChild(card));

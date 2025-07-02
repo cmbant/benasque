@@ -45,6 +45,7 @@ try {
                 <div class="sort-controls">
                     <label>Sort by:</label>
                     <select id="sortSelect">
+                        <option value="random" selected>Random</option>
                         <option value="first_name">First Name</option>
                         <option value="last_name">Last Name</option>
                     </select>
@@ -184,7 +185,7 @@ try {
                         <input type="checkbox" id="emailPublic" name="email_public" value="1" checked>
                         <label for="emailPublic">Show on profile</label>
                     </div>
-                    <small>Used to identify your entry for future edits</small>
+                    <small>Used to identify your entry for future edits. <a href="#" id="recoverProfileLink" class="recover-link">Have an existing profile?</a></small>
                 </div>
 
                 <div class="form-group">

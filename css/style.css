@@ -470,6 +470,16 @@ header h1 {
     cursor: pointer;
 }
 
+.recover-link {
+    color: #4CAF50;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.recover-link:hover {
+    text-decoration: underline;
+}
+
 .form-actions {
     display: flex;
     gap: 1rem;
