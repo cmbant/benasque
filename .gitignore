@@ -1,3 +1,6 @@
+# Configuration files
+config.php
+
 # Database files
 database/benasque25.db
 database/benasque25.db-journal

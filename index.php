@@ -1,6 +1,9 @@
 <?php
 require_once 'database/Database.php';
 
+// Load configuration
+$config = file_exists('config.php') ? require 'config.php' : require 'config.sample.php';
+
 try {
     $db = new Database();
     $participants = $db->getAllParticipants();
@@ -17,18 +20,20 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benasque 25 - Conference Participants</title>
+    <title><?= htmlspecialchars($config['page_title']) ?></title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <header>
         <div class="container">
-            <h1>Benasque 25 Conference</h1>
+            <h1><?= htmlspecialchars($config['conference_name']) ?></h1>
             <nav class="tab-navigation">
-                <button id="participantsTab" class="tab-btn active">Participants</button>
-                <button id="blackboardTab" class="tab-btn">Virtual Blackboard</button>
                 <button id="addEditBtn" class="btn btn-secondary">Add/Edit Entry</button>
+                <div class="tab-buttons">
+                    <button id="participantsTab" class="tab-btn active">Participants</button>
+                    <button id="blackboardTab" class="tab-btn"><?= htmlspecialchars($config['virtual_blackboard_title']) ?></button>
+                </div>
             </nav>
         </div>
     </header>
@@ -126,7 +131,7 @@ try {
         <div id="blackboardContent" class="tab-content">
             <div class="iframe-container">
                 <iframe
-                    src="https://docs.google.com/document/d/1g1rdI2nEuUJMxAfSa1Hi11gqwHFca63w6lZZRzsxelA/edit"
+                    src="<?= htmlspecialchars($config['virtual_blackboard_url']) ?>"
                     frameborder="0"
                     allowfullscreen>
                 </iframe>

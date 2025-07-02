@@ -121,7 +121,19 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleFormSubmit(event) {
         event.preventDefault();
 
+        // Temporarily enable email field if disabled for form submission
+        const emailField = document.getElementById('email');
+        const wasDisabled = emailField.disabled;
+        if (wasDisabled) {
+            emailField.disabled = false;
+        }
+
         const formData = new FormData(participantForm);
+
+        // Re-disable email field if it was disabled
+        if (wasDisabled) {
+            emailField.disabled = true;
+        }
 
         // Process arXiv links
         const arxivText = formData.get('arxiv_links').trim();
