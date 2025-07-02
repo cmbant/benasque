@@ -8,8 +8,8 @@ class Database
     public function __construct($dbPath = null)
     {
         if ($dbPath === null) {
-            // Use absolute path from document root
-            $this->dbPath = $_SERVER['DOCUMENT_ROOT'] . '/database/benasque25.db';
+            // Use __DIR__ for reliable path resolution
+            $this->dbPath = __DIR__ . '/benasque25.db';
         } else {
             $this->dbPath = $dbPath;
         }
@@ -20,18 +20,37 @@ class Database
     private function connect()
     {
         try {
+            // Ensure the database directory exists and is writable
+            $dbDir = dirname($this->dbPath);
+            if (!is_dir($dbDir)) {
+                throw new Exception("Database directory does not exist: $dbDir");
+            }
+
+            if (!is_writable($dbDir)) {
+                throw new Exception("Database directory is not writable: $dbDir (current permissions: " . substr(sprintf('%o', fileperms($dbDir)), -4) . ")");
+            }
+
             $this->pdo = new PDO("sqlite:" . $this->dbPath);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            throw new Exception("Database connection failed: " . $e->getMessage());
+            throw new Exception("Database connection failed: " . $e->getMessage() . " (Path: " . $this->dbPath . ")");
         }
     }
 
     private function initializeSchema()
     {
-        $sqlPath = $_SERVER['DOCUMENT_ROOT'] . '/database/init.sql';
+        $sqlPath = __DIR__ . '/init.sql';
+
+        if (!file_exists($sqlPath)) {
+            throw new Exception('Could not find init.sql file: ' . $sqlPath);
+        }
+
         $sql = file_get_contents($sqlPath);
+        if ($sql === false) {
+            throw new Exception('Could not read init.sql file: ' . $sqlPath);
+        }
+
         $this->pdo->exec($sql);
     }
 
