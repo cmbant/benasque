@@ -9,6 +9,6 @@ Header always set X-Content-Type-Options nosniff
 Header always set X-Frame-Options DENY
 Header always set X-XSS-Protection "1; mode=block"
 
-<FilesMatch "^\.htaccess|^\.|.*\.(git|env|log|ini|conf|config|bak|backup|old|tmp|temp|md|ps1|py)$">
+<FilesMatch "^\.htaccess|^\.(?!well-known)|.*\.(git|env|log|ini|conf|config|bak|backup|old|tmp|temp|md|ps1|py)$">
     Require all denied
 </FilesMatch>
