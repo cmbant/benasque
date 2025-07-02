@@ -38,8 +38,12 @@ document.addEventListener('DOMContentLoaded', function() {
     closeBtn.addEventListener('click', closeModal);
     cancelBtn.addEventListener('click', closeModal);
 
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
+    // Note: Removed click-outside-to-close behavior to prevent accidental closing
+    // Modal now only closes via explicit button clicks (X, Cancel, or Save) or Escape key
+
+    // Add Escape key support for closing modal
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
             closeModal();
         }
     });
@@ -98,7 +102,16 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Handle arXiv links
                     if (data.participant.arxiv_links) {
                         const links = JSON.parse(data.participant.arxiv_links);
-                        document.getElementById('arxivLinks').value = links.join('\n');
+                        // Handle both old format (simple URLs) and new format (objects with url/title)
+                        const urlList = links.map(link => {
+                            if (typeof link === 'string') {
+                                return link; // Old format: simple URL
+                            } else if (link && link.url) {
+                                return link.url; // New format: extract URL from object
+                            }
+                            return ''; // Invalid entry
+                        }).filter(url => url.trim() !== '');
+                        document.getElementById('arxivLinks').value = urlList.join('\n');
                     }
 
                     // Disable email field in edit mode

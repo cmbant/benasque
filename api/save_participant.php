@@ -5,6 +5,7 @@ header('Access-Control-Allow-Methods: POST');
 header('Access-Control-Allow-Headers: Content-Type');
 
 require_once '../database/Database.php';
+require_once '../utils/ArxivAPI.php';
 
 function resizeImage($sourcePath, $targetPath, $maxWidth = 300, $maxHeight = 300)
 {
@@ -107,7 +108,16 @@ try {
     // Limit to 3 arXiv links
     if (count($arxivArray) > 3) {
         $arxivArray = array_slice($arxivArray, 0, 3);
-        $arxivLinks = json_encode($arxivArray);
+    }
+
+    // Process arXiv links to fetch titles
+    if (!empty($arxivArray)) {
+        error_log('Processing ' . count($arxivArray) . ' arXiv links for title fetching...');
+        $processedLinks = ArxivAPI::processArxivLinks($arxivArray);
+        $arxivLinks = json_encode($processedLinks);
+        error_log('Processed arXiv links: ' . $arxivLinks);
+    } else {
+        $arxivLinks = json_encode([]);
     }
 
     $db = new Database();

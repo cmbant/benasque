@@ -254,7 +254,10 @@ header h1 {
     color: #4CAF50;
     text-decoration: none;
     font-size: 0.9rem;
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    line-height: 1.4;
 }
 
 .arxiv-links a:hover {

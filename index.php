@@ -115,7 +115,21 @@ try {
                                     if ($links && is_array($links)): ?>
                                         <ul>
                                             <?php foreach ($links as $link): ?>
-                                                <li><a href="<?= htmlspecialchars($link) ?>" target="_blank"><?= htmlspecialchars($link) ?></a></li>
+                                                <?php
+                                                // Handle both old format (simple URLs) and new format (objects with url/title)
+                                                if (is_string($link)) {
+                                                    // Old format: simple URL string
+                                                    $url = $link;
+                                                    $title = $link; // Fallback to URL
+                                                } else if (is_array($link) && isset($link['url'])) {
+                                                    // New format: object with url and title
+                                                    $url = $link['url'];
+                                                    $title = !empty($link['title']) ? $link['title'] : $link['url'];
+                                                } else {
+                                                    continue; // Skip invalid entries
+                                                }
+                                                ?>
+                                                <li><a href="<?= htmlspecialchars($url) ?>" target="_blank"><?= htmlspecialchars($title) ?></a></li>
                                             <?php endforeach; ?>
                                         </ul>
                                     <?php endif; ?>

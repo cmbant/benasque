@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS participants (
     email TEXT UNIQUE NOT NULL,
     interests TEXT, -- Comma-separated keywords
     description TEXT, -- General description/comments
-    arxiv_links TEXT, -- JSON array of arXiv URLs
+    arxiv_links TEXT, -- JSON array of arXiv objects with url and title fields
     photo_path TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
