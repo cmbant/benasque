@@ -28,8 +28,14 @@ A web application for conference participants to share their information and sub
 
 ### Local Development with Docker
 
+**Start the server:**
 ```bash
 docker-compose up -d
+```
+
+**Stop the server:**
+```bash
+docker-compose down
 ```
 
 Access the application at http://localhost:8080
