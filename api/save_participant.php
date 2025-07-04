@@ -18,11 +18,6 @@ function resizeImage($sourcePath, $targetPath, $maxWidth = 300, $maxHeight = 300
     $sourceHeight = $imageInfo[1];
     $imageType = $imageInfo[2];
 
-    // Calculate new dimensions
-    $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
-    $newWidth = round($sourceWidth * $ratio);
-    $newHeight = round($sourceHeight * $ratio);
-
     // Create source image
     switch ($imageType) {
         case IMAGETYPE_JPEG:
@@ -37,6 +32,66 @@ function resizeImage($sourcePath, $targetPath, $maxWidth = 300, $maxHeight = 300
         default:
             return false;
     }
+
+    // Handle EXIF orientation for JPEG images
+    if ($imageType == IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+        $exif = @exif_read_data($sourcePath);
+        if ($exif && isset($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 2:
+                    // Flip horizontally
+                    imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                    break;
+                case 3:
+                    // Rotate 180 degrees
+                    $sourceImage = imagerotate($sourceImage, 180, 0);
+                    break;
+                case 4:
+                    // Flip vertically
+                    imageflip($sourceImage, IMG_FLIP_VERTICAL);
+                    break;
+                case 5:
+                    // Rotate 90 degrees counter-clockwise and flip horizontally
+                    $sourceImage = imagerotate($sourceImage, -90, 0);
+                    imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                    // Update dimensions after rotation
+                    $temp = $sourceWidth;
+                    $sourceWidth = $sourceHeight;
+                    $sourceHeight = $temp;
+                    break;
+                case 6:
+                    // Rotate 90 degrees clockwise
+                    $sourceImage = imagerotate($sourceImage, -90, 0);
+                    // Update dimensions after rotation
+                    $temp = $sourceWidth;
+                    $sourceWidth = $sourceHeight;
+                    $sourceHeight = $temp;
+                    break;
+                case 7:
+                    // Rotate 90 degrees clockwise and flip horizontally
+                    $sourceImage = imagerotate($sourceImage, 90, 0);
+                    imageflip($sourceImage, IMG_FLIP_HORIZONTAL);
+                    // Update dimensions after rotation
+                    $temp = $sourceWidth;
+                    $sourceWidth = $sourceHeight;
+                    $sourceHeight = $temp;
+                    break;
+                case 8:
+                    // Rotate 90 degrees counter-clockwise
+                    $sourceImage = imagerotate($sourceImage, 90, 0);
+                    // Update dimensions after rotation
+                    $temp = $sourceWidth;
+                    $sourceWidth = $sourceHeight;
+                    $sourceHeight = $temp;
+                    break;
+            }
+        }
+    }
+
+    // Calculate new dimensions after orientation correction
+    $ratio = min($maxWidth / $sourceWidth, $maxHeight / $sourceHeight);
+    $newWidth = round($sourceWidth * $ratio);
+    $newHeight = round($sourceHeight * $ratio);
 
     // Create target image
     $targetImage = imagecreatetruecolor($newWidth, $newHeight);
