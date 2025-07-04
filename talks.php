@@ -145,11 +145,13 @@ try {
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
         }
 
         .talks-table table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 800px;
         }
 
         .talks-table th {
@@ -160,6 +162,7 @@ try {
             border-bottom: 2px solid #e9ecef;
             cursor: pointer;
             user-select: none;
+            white-space: nowrap;
         }
 
         .talks-table th:hover {
@@ -185,6 +188,38 @@ try {
             color: #764ba2;
             text-decoration: underline;
         }
+
+        /* Column width optimization */
+        .talks-table th:nth-child(1),
+        .talks-table td:nth-child(1) {
+            width: 15%;
+        }
+
+        /* Name */
+        .talks-table th:nth-child(2),
+        .talks-table td:nth-child(2) {
+            width: 20%;
+        }
+
+        /* Email */
+        .talks-table th:nth-child(3),
+        .talks-table td:nth-child(3) {
+            width: 15%;
+        }
+
+        /* Talk Type */
+        .talks-table th:nth-child(4),
+        .talks-table td:nth-child(4) {
+            width: 20%;
+        }
+
+        /* Title */
+        .talks-table th:nth-child(5),
+        .talks-table td:nth-child(5) {
+            width: 30%;
+        }
+
+        /* Abstract */
 
         .talk-type {
             display: inline-block;
@@ -221,8 +256,116 @@ try {
         }
 
         .talk-abstract {
-            max-width: 300px;
             word-wrap: break-word;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .abstract-content {
+            display: block;
+        }
+
+        .abstract-content.truncated {
+            max-height: 4.2em;
+            /* Show ~3 lines */
+            overflow: hidden;
+            position: relative;
+        }
+
+        .abstract-content.truncated::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 50px;
+            height: 1.4em;
+            background: linear-gradient(to right, transparent, white 50%);
+        }
+
+        .abstract-toggle {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 0.25rem 0;
+            margin-top: 0.25rem;
+            text-decoration: underline;
+            display: block;
+        }
+
+        .abstract-toggle:hover {
+            color: #764ba2;
+        }
+
+        .abstract-full {
+            display: none;
+        }
+
+        .abstract-full.show {
+            display: block;
+        }
+
+        /* Responsive design for mobile */
+        @media (max-width: 768px) {
+            .talks-table {
+                font-size: 0.9em;
+            }
+
+            .talks-table th,
+            .talks-table td {
+                padding: 0.5rem;
+            }
+
+            .talks-table th:nth-child(2),
+            .talks-table td:nth-child(2) {
+                display: none;
+                /* Hide email on mobile */
+            }
+
+            .talks-table th:nth-child(1),
+            .talks-table td:nth-child(1) {
+                width: 20%;
+            }
+
+            .talks-table th:nth-child(3),
+            .talks-table td:nth-child(3) {
+                width: 20%;
+            }
+
+            .talks-table th:nth-child(4),
+            .talks-table td:nth-child(4) {
+                width: 25%;
+            }
+
+            .talks-table th:nth-child(5),
+            .talks-table td:nth-child(5) {
+                width: 35%;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .talks-table th:nth-child(3),
+            .talks-table td:nth-child(3) {
+                display: none;
+                /* Hide talk type on very small screens */
+            }
+
+            .talks-table th:nth-child(1),
+            .talks-table td:nth-child(1) {
+                width: 30%;
+            }
+
+            .talks-table th:nth-child(4),
+            .talks-table td:nth-child(4) {
+                width: 35%;
+            }
+
+            .talks-table th:nth-child(5),
+            .talks-table td:nth-child(5) {
+                width: 35%;
+            }
         }
 
         .no-talks {
@@ -383,7 +526,26 @@ try {
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($talk['talk_title'] ?: '-') ?></td>
-                                <td class="talk-abstract"><?= htmlspecialchars($talk['talk_abstract'] ?: '-') ?></td>
+                                <td class="talk-abstract">
+                                    <?php if (!empty($talk['talk_abstract'])): ?>
+                                        <?php
+                                        $abstract = htmlspecialchars($talk['talk_abstract']);
+                                        $isLong = strlen($abstract) > 200; // Consider abstracts longer than 200 chars as long
+                                        ?>
+                                        <?php if ($isLong): ?>
+                                            <div class="abstract-content truncated" data-full-text="<?= $abstract ?>">
+                                                <?= substr($abstract, 0, 200) ?>...
+                                            </div>
+                                            <button class="abstract-toggle" onclick="toggleAbstract(this)">Show more</button>
+                                        <?php else: ?>
+                                            <div class="abstract-content">
+                                                <?= $abstract ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td class="admin-column" style="display: none;">
                                     <?php if ($talk['talk_contributed']): ?>
                                         <div>
@@ -412,6 +574,27 @@ try {
     </div>
 
     <script>
+        // Function to toggle abstract display
+        function toggleAbstract(button) {
+            const abstractContent = button.previousElementSibling;
+            const fullText = abstractContent.dataset.fullText;
+            const isExpanded = abstractContent.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Collapse
+                abstractContent.textContent = fullText.substring(0, 200) + '...';
+                abstractContent.classList.remove('expanded');
+                abstractContent.classList.add('truncated');
+                button.textContent = 'Show more';
+            } else {
+                // Expand
+                abstractContent.textContent = fullText;
+                abstractContent.classList.remove('truncated');
+                abstractContent.classList.add('expanded');
+                button.textContent = 'Show less';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const sortSelect = document.getElementById('sortSelect');
             const filterSelect = document.getElementById('filterSelect');
