@@ -1,6 +1,19 @@
 <?php
 require_once 'database/Database.php';
 
+// Helper functions for talk status display
+function getStatusClass($status)
+{
+    if ($status === null) return 'pending';
+    return $status ? 'accepted' : 'rejected';
+}
+
+function getStatusIcon($status)
+{
+    if ($status === null) return '⏳';
+    return $status ? '✓' : '✗';
+}
+
 try {
     $db = new Database();
     $pdo = $db->getPDO();
@@ -349,18 +362,6 @@ try {
                             <?php
                             $flashStatus = $talk['talk_flash'] ? 1 : 0; // Flash talks are always accepted if submitted
                             $contribStatus = $talk['talk_contributed_accepted'];
-
-                            function getStatusClass($status)
-                            {
-                                if ($status === null) return 'pending';
-                                return $status ? 'accepted' : 'rejected';
-                            }
-
-                            function getStatusIcon($status)
-                            {
-                                if ($status === null) return '⏳';
-                                return $status ? '✓' : '✗';
-                            }
                             ?>
                             <tr data-talk-flash="<?= $talk['talk_flash'] ?>"
                                 data-talk-contributed="<?= $talk['talk_contributed'] ?>"
