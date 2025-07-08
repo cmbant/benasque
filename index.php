@@ -116,32 +116,36 @@ try {
                             <?php endif; ?>
 
                             <?php if ($participant['arxiv_links']): ?>
-                                <div class="arxiv-links">
-                                    <strong>Recent Papers:</strong>
-                                    <?php
-                                    $links = json_decode($participant['arxiv_links'], true);
-                                    if ($links && is_array($links)): ?>
-                                        <ul>
-                                            <?php foreach ($links as $link): ?>
-                                                <?php
-                                                // Handle both old format (simple URLs) and new format (objects with url/title)
-                                                if (is_string($link)) {
-                                                    // Old format: simple URL string
-                                                    $url = $link;
-                                                    $title = $link; // Fallback to URL
-                                                } else if (is_array($link) && isset($link['url'])) {
-                                                    // New format: object with url and title
-                                                    $url = $link['url'];
-                                                    $title = !empty($link['title']) ? $link['title'] : $link['url'];
-                                                } else {
-                                                    continue; // Skip invalid entries
-                                                }
-                                                ?>
-                                                <li><a href="<?= htmlspecialchars($url) ?>" target="_blank"><?= htmlspecialchars($title) ?></a></li>
-                                            <?php endforeach; ?>
-                                        </ul>
+                                <?php
+                                $links = json_decode($participant['arxiv_links'], true);
+                                if ($links && is_array($links)):
+                                    // Check if there are any valid links to display
+                                    $validLinks = [];
+                                    foreach ($links as $link) {
+                                        if (is_string($link)) {
+                                            // Old format: simple URL string
+                                            $url = $link;
+                                            $title = $link; // Fallback to URL
+                                            $validLinks[] = ['url' => $url, 'title' => $title];
+                                        } else if (is_array($link) && isset($link['url'])) {
+                                            // New format: object with url and title
+                                            $url = $link['url'];
+                                            $title = !empty($link['title']) ? $link['title'] : $link['url'];
+                                            $validLinks[] = ['url' => $url, 'title' => $title];
+                                        }
+                                    }
+
+                                    if (!empty($validLinks)): ?>
+                                        <div class="arxiv-links">
+                                            <strong>Recent Papers:</strong>
+                                            <ul>
+                                                <?php foreach ($validLinks as $link): ?>
+                                                    <li><a href="<?= htmlspecialchars($link['url']) ?>" target="_blank"><?= htmlspecialchars($link['title']) ?></a></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
                                     <?php endif; ?>
-                                </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
                     </div>
