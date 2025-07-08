@@ -18,6 +18,11 @@ try {
     $db = new Database();
     $pdo = $db->getPDO();
 
+    // Get count of all participants with profiles
+    $countSql = "SELECT COUNT(*) as profile_count FROM participants";
+    $countStmt = $pdo->query($countSql);
+    $profileCount = $countStmt->fetch()['profile_count'];
+
     // Get all participants who have submitted talks
     $sql = "SELECT first_name, last_name, email, talk_flash, talk_contributed, talk_title, talk_abstract,
                    talk_flash_accepted, talk_contributed_accepted
@@ -29,6 +34,7 @@ try {
 } catch (Exception $e) {
     $error = $e->getMessage();
     $talks = [];
+    $profileCount = 0;
 }
 ?>
 <!DOCTYPE html>
@@ -395,7 +401,7 @@ try {
         <div class="talks-header">
             <h1>Submitted Talks</h1>
             <p>Overview of all talk submissions for the conference</p>
-            <p><a href="index.php" style="color: white; text-decoration: underline;">← Back to Main Page</a></p>
+            <p><a href="index.php" style="color: white; text-decoration: underline;">← Back to Main Page</a> | <?= $profileCount ?> people have profiles</p>
             <?php if (!empty($talks)): ?>
                 <div class="stats">
                     <?php
