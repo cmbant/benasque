@@ -146,6 +146,37 @@ try {
             border-color: #ffc107;
         }
 
+        .admin-select.saving {
+            background: #e3f2fd;
+            border-color: #2196f3;
+        }
+
+        .admin-select.saved {
+            background: #e8f5e8;
+            border-color: #4caf50;
+        }
+
+        .admin-select.error {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .save-indicator {
+            font-weight: 500;
+        }
+
+        .save-indicator.saving {
+            color: #2196f3;
+        }
+
+        .save-indicator.saved {
+            color: #4caf50;
+        }
+
+        .save-indicator.error {
+            color: #f44336;
+        }
+
         .talks-table {
             background: white;
             border-radius: 10px;
@@ -475,7 +506,6 @@ try {
                         <label>
                             <input type="checkbox" id="adminMode"> Admin Mode
                         </label>
-                        <button id="saveAllChanges" class="btn btn-primary" style="display: none;">Save All Changes</button>
                     </div>
 
                     <button id="downloadCsv" class="btn btn-secondary">Download CSV</button>
@@ -542,11 +572,13 @@ try {
                                     <?php if ($talk['talk_contributed']): ?>
                                         <div>
                                             <label>Contributed:</label>
-                                            <select class="admin-select contributed-select" data-type="contributed">
+                                            <select class="admin-select contributed-select" data-type="contributed"
+                                                data-original-value="<?= $contribStatus === null ? 'null' : $contribStatus ?>">
                                                 <option value="">Pending</option>
                                                 <option value="1" <?= $contribStatus === 1 ? 'selected' : '' ?>>Accept</option>
                                                 <option value="0" <?= $contribStatus === 0 ? 'selected' : '' ?>>Reject</option>
                                             </select>
+                                            <div class="save-indicator" style="display: none; font-size: 0.8em; margin-top: 0.25rem;"></div>
                                         </div>
                                     <?php else: ?>
                                         <div style="color: #666; font-style: italic;">Flash talks are auto-accepted</div>
@@ -591,14 +623,14 @@ try {
             const sortSelect = document.getElementById('sortSelect');
             const filterSelect = document.getElementById('filterSelect');
             const adminModeCheckbox = document.getElementById('adminMode');
-            const saveAllBtn = document.getElementById('saveAllChanges');
+
             const table = document.getElementById('talksTable');
             const tbody = table ? table.querySelector('tbody') : null;
 
             if (!tbody) return;
 
             let originalRows = Array.from(tbody.querySelectorAll('tr'));
-            let changedRows = new Set();
+            let pageLoadTime = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL datetime format
 
             function sortTable() {
                 const sortBy = sortSelect.value;
@@ -693,20 +725,93 @@ try {
                     col.style.display = isAdmin ? '' : 'none';
                 });
 
-                saveAllBtn.style.display = isAdmin ? 'inline-block' : 'none';
+                // Save admin mode state to localStorage
+                localStorage.setItem('adminMode', isAdmin ? '1' : '0');
             }
 
-            function handleAdminChange(event) {
+            async function handleAdminChange(event) {
                 const select = event.target;
                 const row = select.closest('tr');
                 const email = row.dataset.email;
+                const indicator = select.parentElement.querySelector('.save-indicator');
 
-                // Mark as changed
-                select.classList.add('changed');
-                changedRows.add(email);
+                // Show saving state
+                select.classList.remove('changed', 'saved', 'error');
+                select.classList.add('saving');
+                indicator.style.display = 'block';
+                indicator.textContent = 'Saving...';
+                indicator.className = 'save-indicator saving';
 
-                // Update the visual indicators in the talk type column
-                updateTalkTypeDisplay(row);
+                // Get current and expected values
+                const originalValue = select.dataset.originalValue === 'null' ? '' : select.dataset.originalValue;
+                const newValue = select.value;
+
+                try {
+                    const formData = new FormData();
+                    formData.append('email', email);
+                    formData.append('talk_contributed_accepted', newValue);
+                    formData.append('expected_contributed_accepted', originalValue);
+                    formData.append('page_load_time', pageLoadTime);
+
+                    const response = await fetch('api/update_talk_status.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Success - change was saved
+                        select.classList.remove('saving');
+                        select.classList.add('saved');
+
+                        // Update original value for next change
+                        select.dataset.originalValue = newValue;
+
+                        // Update the visual indicators in the talk type column
+                        updateTalkTypeDisplay(row);
+
+                        // Update statistics
+                        updateStatistics();
+
+                        if (result.reload_needed) {
+                            // Other changes detected - reload to show current data
+                            indicator.textContent = 'Saved ✓ - Refreshing page...';
+                            indicator.className = 'save-indicator saved';
+                            setTimeout(() => window.location.reload(), 1500);
+                        } else {
+                            // Normal save - update timestamp and show success
+                            pageLoadTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+                            indicator.textContent = 'Saved ✓';
+                            indicator.className = 'save-indicator saved';
+                            setTimeout(() => {
+                                indicator.style.display = 'none';
+                                select.classList.remove('saved');
+                            }, 2000);
+                        }
+
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    // Error
+                    select.classList.remove('saving');
+                    select.classList.add('error');
+
+                    if (error.message.includes('CONFLICT')) {
+                        indicator.textContent = 'Conflict! Refresh page';
+                        indicator.className = 'save-indicator error';
+                        // Show refresh prompt for specific conflicts
+                        setTimeout(() => {
+                            if (confirm('This talk status was changed by another admin. Refresh the page to see current values?')) {
+                                window.location.reload();
+                            }
+                        }, 1000);
+                    } else {
+                        indicator.textContent = 'Error saving';
+                        indicator.className = 'save-indicator error';
+                    }
+                }
             }
 
             function updateTalkTypeDisplay(row) {
@@ -808,57 +913,7 @@ try {
                 document.body.removeChild(link);
             }
 
-            async function saveAllChanges() {
-                if (changedRows.size === 0) {
-                    alert('No changes to save');
-                    return;
-                }
 
-                saveAllBtn.disabled = true;
-                saveAllBtn.textContent = 'Saving...';
-
-                const promises = [];
-
-                changedRows.forEach(email => {
-                    const row = document.querySelector(`tr[data-email="${email}"]`);
-                    const contribSelect = row.querySelector('.contributed-select');
-
-                    const formData = new FormData();
-                    formData.append('email', email);
-                    formData.append('talk_flash_accepted', '1'); // Flash talks are always accepted
-                    formData.append('talk_contributed_accepted', contribSelect ? contribSelect.value : '');
-
-                    promises.push(
-                        fetch('api/update_talk_status.php', {
-                            method: 'POST',
-                            body: formData
-                        }).then(response => response.json())
-                    );
-                });
-
-                try {
-                    const results = await Promise.all(promises);
-                    const failed = results.filter(r => !r.success);
-
-                    if (failed.length === 0) {
-                        alert('All changes saved successfully!');
-                        // Clear changed status
-                        document.querySelectorAll('.admin-select.changed').forEach(select => {
-                            select.classList.remove('changed');
-                        });
-                        changedRows.clear();
-                        // Update statistics
-                        updateStatistics();
-                    } else {
-                        alert(`Some changes failed to save: ${failed.map(f => f.message).join(', ')}`);
-                    }
-                } catch (error) {
-                    alert('Error saving changes: ' + error.message);
-                }
-
-                saveAllBtn.disabled = false;
-                saveAllBtn.textContent = 'Save All Changes';
-            }
 
             function updateStatistics() {
                 const rows = tbody.querySelectorAll('tr');
@@ -894,9 +949,8 @@ try {
             sortSelect.addEventListener('change', sortTable);
             filterSelect.addEventListener('change', filterTable);
             adminModeCheckbox.addEventListener('change', toggleAdminMode);
-            saveAllBtn.addEventListener('click', saveAllChanges);
 
-            // Admin select change handlers
+            // Admin select change handlers - auto-save on change
             tbody.addEventListener('change', function(event) {
                 if (event.target.classList.contains('admin-select')) {
                     handleAdminChange(event);
@@ -906,6 +960,12 @@ try {
             const downloadBtn = document.getElementById('downloadCsv');
             if (downloadBtn) {
                 downloadBtn.addEventListener('click', downloadCsv);
+            }
+
+            // Restore admin mode state from localStorage
+            const savedAdminMode = localStorage.getItem('adminMode');
+            if (savedAdminMode === '1') {
+                adminModeCheckbox.checked = true;
             }
 
             // Initial setup
