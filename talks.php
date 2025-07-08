@@ -198,30 +198,24 @@ try {
         /* Column width optimization */
         .talks-table th:nth-child(1),
         .talks-table td:nth-child(1) {
-            width: 15%;
+            width: 20%;
         }
 
-        /* Name */
+        /* Talk Type */
         .talks-table th:nth-child(2),
         .talks-table td:nth-child(2) {
             width: 20%;
         }
 
-        /* Email */
+        /* Title */
         .talks-table th:nth-child(3),
         .talks-table td:nth-child(3) {
-            width: 15%;
+            width: 30%;
         }
 
-        /* Talk Type */
+        /* Abstract */
         .talks-table th:nth-child(4),
         .talks-table td:nth-child(4) {
-            width: 20%;
-        }
-
-        /* Title */
-        .talks-table th:nth-child(5),
-        .talks-table td:nth-child(5) {
             width: 30%;
         }
 
@@ -323,54 +317,48 @@ try {
                 padding: 0.5rem;
             }
 
-            .talks-table th:nth-child(2),
-            .talks-table td:nth-child(2) {
-                display: none;
-                /* Hide email on mobile */
-            }
-
             .talks-table th:nth-child(1),
             .talks-table td:nth-child(1) {
-                width: 20%;
+                width: 25%;
+            }
+
+            .talks-table th:nth-child(2),
+            .talks-table td:nth-child(2) {
+                width: 25%;
             }
 
             .talks-table th:nth-child(3),
             .talks-table td:nth-child(3) {
-                width: 20%;
+                width: 25%;
             }
 
             .talks-table th:nth-child(4),
             .talks-table td:nth-child(4) {
                 width: 25%;
             }
-
-            .talks-table th:nth-child(5),
-            .talks-table td:nth-child(5) {
-                width: 35%;
-            }
         }
 
         @media (max-width: 480px) {
 
-            .talks-table th:nth-child(3),
-            .talks-table td:nth-child(3) {
+            .talks-table th:nth-child(2),
+            .talks-table td:nth-child(2) {
                 display: none;
                 /* Hide talk type on very small screens */
             }
 
             .talks-table th:nth-child(1),
             .talks-table td:nth-child(1) {
-                width: 30%;
+                width: 35%;
+            }
+
+            .talks-table th:nth-child(3),
+            .talks-table td:nth-child(3) {
+                width: 35%;
             }
 
             .talks-table th:nth-child(4),
             .talks-table td:nth-child(4) {
-                width: 35%;
-            }
-
-            .talks-table th:nth-child(5),
-            .talks-table td:nth-child(5) {
-                width: 35%;
+                width: 30%;
             }
         }
 
@@ -499,7 +487,6 @@ try {
                     <thead>
                         <tr>
                             <th data-sort="name">Name</th>
-                            <th data-sort="email">Email</th>
                             <th data-sort="type">Talk Type</th>
                             <th data-sort="title">Title</th>
                             <th>Abstract</th>
@@ -517,8 +504,7 @@ try {
                                 data-flash-accepted="<?= $flashStatus ?>"
                                 data-contributed-accepted="<?= $contribStatus ?? 'null' ?>"
                                 data-email="<?= htmlspecialchars($talk['email']) ?>">
-                                <td><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></td>
-                                <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['email']) ?></a></td>
+                                <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></a></td>
                                 <td>
                                     <?php if ($talk['talk_flash']): ?>
                                         <span class="talk-type flash <?= getStatusClass($flashStatus) ?>">
@@ -626,10 +612,6 @@ try {
                             aVal = a.cells[0].textContent.trim();
                             bVal = b.cells[0].textContent.trim();
                             break;
-                        case 'email':
-                            aVal = a.cells[1].textContent.trim();
-                            bVal = b.cells[1].textContent.trim();
-                            break;
                         case 'type':
                             // Sort by talk type priority: contributed > flash > both
                             const aFlash = a.dataset.talkFlash === '1';
@@ -648,8 +630,8 @@ try {
                             bVal = getTypePriority(bFlash, bContrib);
                             return bVal - aVal; // Descending order
                         case 'title':
-                            aVal = a.cells[3].textContent.trim();
-                            bVal = b.cells[3].textContent.trim();
+                            aVal = a.cells[2].textContent.trim();
+                            bVal = b.cells[2].textContent.trim();
                             break;
                         default:
                             return 0;
@@ -759,7 +741,7 @@ try {
                 const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
 
                 // CSV headers
-                const headers = ['Last Name', 'First Name', 'Email', 'Flash Talk', 'Contributed Talk', 'Title', 'Abstract'];
+                const headers = ['Last Name', 'First Name', 'Email', 'Flash Talk', 'Contributed Talk', 'Title', 'Abstract', 'Contributed Status'];
                 let csvContent = headers.join(',') + '\n';
 
                 // CSV data
@@ -767,11 +749,28 @@ try {
                     const cells = row.querySelectorAll('td');
                     const name = cells[0].textContent.trim();
                     const [lastName, firstName] = name.split(', ');
-                    const email = cells[1].textContent.trim();
+                    const email = row.dataset.email; // Get email from data attribute
                     const flash = row.dataset.talkFlash === '1' ? 'Yes' : 'No';
                     const contributed = row.dataset.talkContributed === '1' ? 'Yes' : 'No';
-                    const title = cells[3].textContent.trim();
-                    const abstract = cells[4].textContent.trim();
+                    const title = cells[2].textContent.trim(); // Updated cell index
+                    const abstract = cells[3].textContent.trim(); // Updated cell index
+
+                    // Determine contributed status (flash talks are always accepted)
+                    let acceptedStatus = '';
+                    if (row.dataset.talkContributed === '1') {
+                        const contribAccepted = row.dataset.contributedAccepted === '1';
+                        const contribPending = row.dataset.contributedAccepted === 'null';
+
+                        if (contribAccepted) {
+                            acceptedStatus = 'Accepted';
+                        } else if (contribPending) {
+                            acceptedStatus = 'Pending';
+                        } else {
+                            acceptedStatus = 'Rejected';
+                        }
+                    } else {
+                        acceptedStatus = 'N/A'; // Flash only talks
+                    }
 
                     // Escape CSV values (wrap in quotes if they contain commas, quotes, or newlines)
                     const escapeCSV = (value) => {
@@ -788,7 +787,8 @@ try {
                         flash,
                         contributed,
                         escapeCSV(title),
-                        escapeCSV(abstract)
+                        escapeCSV(abstract),
+                        escapeCSV(acceptedStatus)
                     ];
 
                     csvContent += rowData.join(',') + '\n';
