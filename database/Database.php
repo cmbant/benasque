@@ -33,6 +33,8 @@ class Database
             $this->pdo = new PDO("sqlite:" . $this->dbPath);
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            // Ensure UTF-8 encoding
+            $this->pdo->exec("PRAGMA encoding = 'UTF-8'");
         } catch (PDOException $e) {
             throw new Exception("Database connection failed: " . $e->getMessage() . " (Path: " . $this->dbPath . ")");
         }
@@ -61,13 +63,35 @@ class Database
 
     public function getAllParticipants()
     {
-        $stmt = $this->pdo->query("SELECT * FROM participants ORDER BY first_name, last_name");
+        $stmt = $this->pdo->query("
+            SELECT p.*,
+                   r.status as registration_status,
+                   r.affiliation as registration_affiliation,
+                   r.first_name as registration_first_name,
+                   r.last_name as registration_last_name,
+                   r.start_date,
+                   r.end_date
+            FROM participants p
+            LEFT JOIN registrations r ON p.email = r.email
+            ORDER BY p.first_name, p.last_name
+        ");
         return $stmt->fetchAll();
     }
 
     public function getParticipantByEmail($email)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM participants WHERE email = ?");
+        $stmt = $this->pdo->prepare("
+            SELECT p.*,
+                   r.status as registration_status,
+                   r.affiliation as registration_affiliation,
+                   r.first_name as registration_first_name,
+                   r.last_name as registration_last_name,
+                   r.start_date,
+                   r.end_date
+            FROM participants p
+            LEFT JOIN registrations r ON p.email = r.email
+            WHERE p.email = ?
+        ");
         $stmt->execute([$email]);
         return $stmt->fetch();
     }
@@ -152,5 +176,50 @@ class Database
         }
         sort($allInterests);
         return $allInterests;
+    }
+
+    // Registration-related methods
+    public function getRegistrationByEmail($email)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM registrations WHERE email = ?");
+        $stmt->execute([$email]);
+        return $stmt->fetch();
+    }
+
+    public function getAllRegistrations()
+    {
+        $stmt = $this->pdo->query("SELECT * FROM registrations ORDER BY status, name");
+        return $stmt->fetchAll();
+    }
+
+    public function getRegistrationStats()
+    {
+        $stmt = $this->pdo->query("
+            SELECT status, COUNT(*) as count
+            FROM registrations
+            GROUP BY status
+            ORDER BY status
+        ");
+
+        $stats = [];
+        while ($row = $stmt->fetch()) {
+            $stats[$row['status']] = $row['count'];
+        }
+
+        $totalStmt = $this->pdo->query("SELECT COUNT(*) as total FROM registrations");
+        $stats['TOTAL'] = $totalStmt->fetch()['total'];
+
+        return $stats;
+    }
+
+    public function getParticipantsWithRegistrationStatus()
+    {
+        $stmt = $this->pdo->query("
+            SELECT p.*, r.status as registration_status, r.start_date, r.end_date
+            FROM participants p
+            LEFT JOIN registrations r ON p.email = r.email
+            ORDER BY p.first_name, p.last_name
+        ");
+        return $stmt->fetchAll();
     }
 }

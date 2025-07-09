@@ -30,3 +30,28 @@ CREATE TRIGGER IF NOT EXISTS update_participants_timestamp
 BEGIN
     UPDATE participants SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
+
+-- Registration status table (from orgaccept.pl HTML files)
+CREATE TABLE IF NOT EXISTS registrations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT UNIQUE NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('ACCEPTED', 'INVITED', 'CANCELLED')),
+    affiliation TEXT,
+    start_date TEXT,
+    end_date TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for registrations table
+CREATE INDEX IF NOT EXISTS idx_registrations_email ON registrations(email);
+CREATE INDEX IF NOT EXISTS idx_registrations_status ON registrations(status);
+
+-- Trigger to update registrations timestamp
+CREATE TRIGGER IF NOT EXISTS update_registrations_timestamp
+    AFTER UPDATE ON registrations
+BEGIN
+    UPDATE registrations SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
+END;

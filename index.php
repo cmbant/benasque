@@ -83,12 +83,25 @@ try {
                         </div>
 
                         <div class="participant-info">
-                            <h3><?= htmlspecialchars($participant['first_name'] . ' ' . $participant['last_name']) ?></h3>
+                            <?php if ($participant['email_public'] == 1): ?>
+                                <h3><a href="mailto:<?= htmlspecialchars($participant['email']) ?>" class="name-link"><?= htmlspecialchars($participant['first_name'] . ' ' . $participant['last_name']) ?></a></h3>
+                            <?php else: ?>
+                                <h3><?= htmlspecialchars($participant['first_name'] . ' ' . $participant['last_name']) ?></h3>
+                            <?php endif; ?>
+
+                            <?php if ($participant['registration_affiliation']): ?>
+                                <div class="affiliation">
+                                    <?= htmlspecialchars($participant['registration_affiliation']) ?>
+                                </div>
+                            <?php endif; ?>
 
                             <?php if ($participant['email_public'] == 1): ?>
-                                <div class="email">
-                                    <strong>Email:</strong>
-                                    <a href="mailto:<?= htmlspecialchars($participant['email']) ?>"><?= htmlspecialchars($participant['email']) ?></a>
+                                <div class="registration-dates-only">
+                                    <?php if ($participant['registration_status'] === 'CANCELLED'): ?>
+                                        <span class="registration-status cancelled">Cancelled</span>
+                                    <?php elseif ($participant['start_date'] && $participant['end_date']): ?>
+                                        <span class="registration-dates"><?= htmlspecialchars($participant['start_date']) ?>-<?= htmlspecialchars($participant['end_date']) ?></span>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
 

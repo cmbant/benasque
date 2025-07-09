@@ -33,3 +33,7 @@ Thumbs.db
 
 # Docker volumes
 .docker/
+
+# Python
+__pycache__/
+.venv

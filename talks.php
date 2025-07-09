@@ -420,7 +420,11 @@ try {
         <div class="talks-header">
             <h1>Submitted Talks</h1>
             <p>Overview of all talk submissions for the conference</p>
-            <p><a href="index.php" style="color: white; text-decoration: underline;">← Back to Main Page</a> | <?= $profileCount ?> people have profiles</p>
+            <p>
+                <a href="index.php" style="color: white; text-decoration: underline;">← Back to Main Page</a> |
+                <?= $profileCount ?> people have profiles |
+                <a href="registrations.php" style="color: white; text-decoration: underline;">View Registrations</a>
+            </p>
             <?php if (!empty($talks)): ?>
                 <div class="stats">
                     <?php
@@ -454,25 +458,25 @@ try {
                     }
                     ?>
                     <div class="stat-item">
-                        <strong><?= count($talks) ?></strong> Total Submissions
+                        <strong><?= count($talks) ?></strong> Total
                     </div>
                     <div class="stat-item">
                         <strong><?= $flashCount ?></strong> Flash Only
                     </div>
                     <div class="stat-item">
-                        <strong><?= $contributedCount ?></strong> Contributed Only
+                        <strong><?= $contributedCount ?></strong> Contrib Only
                     </div>
                     <div class="stat-item">
-                        <strong><?= $bothCount ?></strong> Both Types
+                        <strong><?= $bothCount ?></strong> Both
                     </div>
                     <div class="stat-item" id="flashAcceptedStat">
-                        <strong><?= $flashAccepted ?></strong> Flash Accepted
+                        <strong><?= $flashAccepted ?></strong> Flash ✓
                     </div>
                     <div class="stat-item" id="contributedAcceptedStat">
-                        <strong><?= $contributedAccepted ?></strong> Contributed Accepted
+                        <strong><?= $contributedAccepted ?></strong> Contrib ✓
                     </div>
                     <div class="stat-item" id="contributedPendingStat">
-                        <strong><?= $contributedPending ?></strong> Contributed Pending
+                        <strong><?= $contributedPending ?></strong> Contrib ⏳
                     </div>
                 </div>
             <?php endif; ?>
@@ -533,7 +537,9 @@ try {
                                 data-talk-contributed="<?= $talk['talk_contributed'] ?>"
                                 data-flash-accepted="<?= $flashStatus ?>"
                                 data-contributed-accepted="<?= $contribStatus ?? 'null' ?>"
-                                data-email="<?= htmlspecialchars($talk['email']) ?>">
+                                data-email="<?= htmlspecialchars($talk['email']) ?>"
+                                data-talk-title="<?= htmlspecialchars($talk['talk_title'] ?: '') ?>"
+                                data-talk-abstract="<?= htmlspecialchars($talk['talk_abstract'] ?: '') ?>">
                                 <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></a></td>
                                 <td>
                                     <?php if ($talk['talk_flash']): ?>
@@ -857,8 +863,8 @@ try {
                     const email = row.dataset.email; // Get email from data attribute
                     const flash = row.dataset.talkFlash === '1' ? 'Yes' : 'No';
                     const contributed = row.dataset.talkContributed === '1' ? 'Yes' : 'No';
-                    const title = cells[2].textContent.trim(); // Updated cell index
-                    const abstract = cells[3].textContent.trim(); // Updated cell index
+                    const title = row.dataset.talkTitle || ''; // Get full title from data attribute
+                    const abstract = row.dataset.talkAbstract || ''; // Get full abstract from data attribute
 
                     // Determine contributed status (flash talks are always accepted)
                     let acceptedStatus = '';
@@ -940,9 +946,9 @@ try {
                 });
 
                 // Update the statistics display
-                document.getElementById('flashAcceptedStat').innerHTML = `<strong>${flashAccepted}</strong> Flash Accepted`;
-                document.getElementById('contributedAcceptedStat').innerHTML = `<strong>${contributedAccepted}</strong> Contributed Accepted`;
-                document.getElementById('contributedPendingStat').innerHTML = `<strong>${contributedPending}</strong> Contributed Pending`;
+                document.getElementById('flashAcceptedStat').innerHTML = `<strong>${flashAccepted}</strong> Flash ✓`;
+                document.getElementById('contributedAcceptedStat').innerHTML = `<strong>${contributedAccepted}</strong> Contrib ✓`;
+                document.getElementById('contributedPendingStat').innerHTML = `<strong>${contributedPending}</strong> Contrib ⏳`;
             }
 
             // Event listeners
