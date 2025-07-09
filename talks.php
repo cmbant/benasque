@@ -23,12 +23,14 @@ try {
     $countStmt = $pdo->query($countSql);
     $profileCount = $countStmt->fetch()['profile_count'];
 
-    // Get all participants who have submitted talks
-    $sql = "SELECT first_name, last_name, email, talk_flash, talk_contributed, talk_title, talk_abstract,
-                   talk_flash_accepted, talk_contributed_accepted
-            FROM participants
-            WHERE talk_flash = 1 OR talk_contributed = 1
-            ORDER BY last_name, first_name";
+    // Get all participants who have submitted talks with registration dates
+    $sql = "SELECT p.first_name, p.last_name, p.email, p.talk_flash, p.talk_contributed, p.talk_title, p.talk_abstract,
+                   p.talk_flash_accepted, p.talk_contributed_accepted,
+                   r.start_date, r.end_date
+            FROM participants p
+            LEFT JOIN registrations r ON p.email = r.email
+            WHERE p.talk_flash = 1 OR p.talk_contributed = 1
+            ORDER BY p.last_name, p.first_name";
     $stmt = $pdo->query($sql);
     $talks = $stmt->fetchAll();
 } catch (Exception $e) {
@@ -229,25 +231,31 @@ try {
         /* Column width optimization */
         .talks-table th:nth-child(1),
         .talks-table td:nth-child(1) {
-            width: 20%;
+            width: 18%;
         }
 
         /* Talk Type */
         .talks-table th:nth-child(2),
         .talks-table td:nth-child(2) {
-            width: 20%;
+            width: 18%;
         }
 
         /* Title */
         .talks-table th:nth-child(3),
         .talks-table td:nth-child(3) {
-            width: 30%;
+            width: 25%;
+        }
+
+        /* Dates */
+        .talks-table th:nth-child(4),
+        .talks-table td:nth-child(4) {
+            width: 10%;
         }
 
         /* Abstract */
-        .talks-table th:nth-child(4),
-        .talks-table td:nth-child(4) {
-            width: 30%;
+        .talks-table th:nth-child(5),
+        .talks-table td:nth-child(5) {
+            width: 29%;
         }
 
         /* Abstract */
@@ -350,21 +358,26 @@ try {
 
             .talks-table th:nth-child(1),
             .talks-table td:nth-child(1) {
-                width: 25%;
+                width: 20%;
             }
 
             .talks-table th:nth-child(2),
             .talks-table td:nth-child(2) {
-                width: 25%;
+                width: 20%;
             }
 
             .talks-table th:nth-child(3),
             .talks-table td:nth-child(3) {
-                width: 25%;
+                width: 20%;
             }
 
             .talks-table th:nth-child(4),
             .talks-table td:nth-child(4) {
+                width: 15%;
+            }
+
+            .talks-table th:nth-child(5),
+            .talks-table td:nth-child(5) {
                 width: 25%;
             }
         }
@@ -377,6 +390,12 @@ try {
                 /* Hide talk type on very small screens */
             }
 
+            .talks-table th:nth-child(4),
+            .talks-table td:nth-child(4) {
+                display: none;
+                /* Hide registration dates on very small screens */
+            }
+
             .talks-table th:nth-child(1),
             .talks-table td:nth-child(1) {
                 width: 35%;
@@ -387,8 +406,8 @@ try {
                 width: 35%;
             }
 
-            .talks-table th:nth-child(4),
-            .talks-table td:nth-child(4) {
+            .talks-table th:nth-child(5),
+            .talks-table td:nth-child(5) {
                 width: 30%;
             }
         }
@@ -496,7 +515,6 @@ try {
                         <option value="title">Talk Title</option>
                     </select>
 
-                    <label for="filterSelect">Filter by type:</label>
                     <select id="filterSelect">
                         <option value="all">All Submissions</option>
                         <option value="flash">Flash Talks</option>
@@ -504,6 +522,10 @@ try {
                         <option value="contrib-accepted">Contributed: Accepted</option>
                         <option value="contrib-pending">Contributed: Pending</option>
                         <option value="contrib-rejected">Contributed: Rejected</option>
+                    </select>
+
+                    <select id="dateFilter">
+                        <option value="">All dates</option>
                     </select>
 
                     <div class="admin-controls">
@@ -523,6 +545,7 @@ try {
                             <th data-sort="name">Name</th>
                             <th data-sort="type">Talk Type</th>
                             <th data-sort="title">Title</th>
+                            <th data-sort="dates">Dates</th>
                             <th>Abstract</th>
                             <th class="admin-column" style="display: none;">Admin Actions</th>
                         </tr>
@@ -539,7 +562,9 @@ try {
                                 data-contributed-accepted="<?= $contribStatus ?? 'null' ?>"
                                 data-email="<?= htmlspecialchars($talk['email']) ?>"
                                 data-talk-title="<?= htmlspecialchars($talk['talk_title'] ?: '') ?>"
-                                data-talk-abstract="<?= htmlspecialchars($talk['talk_abstract'] ?: '') ?>">
+                                data-talk-abstract="<?= htmlspecialchars($talk['talk_abstract'] ?: '') ?>"
+                                data-start-date="<?= htmlspecialchars($talk['start_date'] ?: '') ?>"
+                                data-end-date="<?= htmlspecialchars($talk['end_date'] ?: '') ?>">
                                 <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></a></td>
                                 <td>
                                     <?php if ($talk['talk_flash']): ?>
@@ -554,6 +579,13 @@ try {
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($talk['talk_title'] ?: '-') ?></td>
+                                <td>
+                                    <?php if ($talk['start_date'] && $talk['end_date']): ?>
+                                        <?= htmlspecialchars($talk['start_date']) ?>-<?= htmlspecialchars($talk['end_date']) ?>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td class="talk-abstract">
                                     <?php if (!empty($talk['talk_abstract'])): ?>
                                         <?php
@@ -625,10 +657,78 @@ try {
             }
         }
 
+        // Helper function to parse date strings like "Jul 20" to a comparable format
+        function parseDate(dateStr) {
+            if (!dateStr) return null;
+            const months = {
+                'Jan': 1,
+                'Feb': 2,
+                'Mar': 3,
+                'Apr': 4,
+                'May': 5,
+                'Jun': 6,
+                'Jul': 7,
+                'Aug': 8,
+                'Sep': 9,
+                'Oct': 10,
+                'Nov': 11,
+                'Dec': 12
+            };
+            const parts = dateStr.trim().split(' ');
+            if (parts.length === 2) {
+                const month = months[parts[0]];
+                const day = parseInt(parts[1]);
+                if (month && day && day >= 1 && day <= 31) {
+                    return month * 100 + day; // e.g., "Jul 20" becomes 720
+                }
+            }
+            return null;
+        }
+
+        // Helper function to format a date consistently (always 2-digit day)
+        function formatDate(month, day) {
+            const monthNames = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                return `${monthNames[month]} ${day.toString().padStart(2, '0')}`;
+            }
+            return null;
+        }
+
+        // Helper function to normalize date string to consistent format
+        function normalizeDate(dateStr) {
+            if (!dateStr) return null;
+            const parsed = parseDate(dateStr);
+            if (!parsed) return null;
+            const month = Math.floor(parsed / 100);
+            const day = parsed % 100;
+            return formatDate(month, day);
+        }
+
+        // Helper function to check if a specific date falls within a person's registration period
+        function isDateInRange(startDate, endDate, filterDate) {
+            if (!startDate || !endDate || !filterDate) return false;
+
+            // Normalize all dates to ensure consistent comparison
+            const normalizedStart = normalizeDate(startDate);
+            const normalizedEnd = normalizeDate(endDate);
+            const normalizedFilter = normalizeDate(filterDate);
+
+            if (!normalizedStart || !normalizedEnd || !normalizedFilter) return false;
+
+            const start = parseDate(normalizedStart);
+            const end = parseDate(normalizedEnd);
+            const filter = parseDate(normalizedFilter);
+
+            if (!start || !end || !filter) return false;
+
+            return filter >= start && filter <= end;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const sortSelect = document.getElementById('sortSelect');
             const filterSelect = document.getElementById('filterSelect');
             const adminModeCheckbox = document.getElementById('adminMode');
+            const dateFilter = document.getElementById('dateFilter');
 
             const table = document.getElementById('talksTable');
             const tbody = table ? table.querySelector('tbody') : null;
@@ -637,6 +737,80 @@ try {
 
             let originalRows = Array.from(tbody.querySelectorAll('tr'));
             let pageLoadTime = new Date().toISOString().slice(0, 19).replace('T', ' '); // MySQL datetime format
+
+            // Populate date filter dropdown
+            function populateDateFilter() {
+                const allDates = new Set();
+
+                originalRows.forEach(row => {
+                    const startDate = row.dataset.startDate;
+                    const endDate = row.dataset.endDate;
+
+                    if (startDate && endDate) {
+                        // Normalize the start and end dates first
+                        const normalizedStart = normalizeDate(startDate);
+                        const normalizedEnd = normalizeDate(endDate);
+
+                        if (normalizedStart && normalizedEnd) {
+                            const start = parseDate(normalizedStart);
+                            const end = parseDate(normalizedEnd);
+
+                            if (start && end) {
+                                // Generate all dates between start and end (inclusive)
+                                const startMonth = Math.floor(start / 100);
+                                const startDay = start % 100;
+                                const endMonth = Math.floor(end / 100);
+                                const endDay = end % 100;
+
+                                // Generate date range with proper month handling
+                                let currentMonth = startMonth;
+                                let currentDay = startDay;
+
+                                const daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]; // Simplified, not handling leap years
+
+                                while (currentMonth < endMonth || (currentMonth === endMonth && currentDay <= endDay)) {
+                                    if (currentMonth >= 1 && currentMonth <= 12 && currentDay >= 1 && currentDay <= daysInMonth[currentMonth]) {
+                                        const dateStr = formatDate(currentMonth, currentDay);
+                                        if (dateStr) {
+                                            allDates.add(dateStr);
+                                        }
+                                    }
+
+                                    currentDay++;
+                                    // Handle month transitions properly
+                                    if (currentDay > daysInMonth[currentMonth]) {
+                                        currentDay = 1;
+                                        currentMonth++;
+                                    }
+
+                                    // Safety break to avoid infinite loops
+                                    if (currentMonth > 12) break;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Sort dates and populate dropdown
+                const sortedDates = Array.from(allDates).sort((a, b) => {
+                    const aVal = parseDate(a) || 0;
+                    const bVal = parseDate(b) || 0;
+                    return aVal - bVal;
+                });
+
+                // Clear existing options except "All dates"
+                while (dateFilter.children.length > 1) {
+                    dateFilter.removeChild(dateFilter.lastChild);
+                }
+
+                // Add date options
+                sortedDates.forEach(date => {
+                    const option = document.createElement('option');
+                    option.value = date;
+                    option.textContent = date;
+                    dateFilter.appendChild(option);
+                });
+            }
 
             function sortTable() {
                 const sortBy = sortSelect.value;
@@ -671,6 +845,13 @@ try {
                             aVal = a.cells[2].textContent.trim();
                             bVal = b.cells[2].textContent.trim();
                             break;
+                        case 'dates':
+                            // Sort by start date
+                            const aStartDate = a.dataset.startDate;
+                            const bStartDate = b.dataset.startDate;
+                            aVal = parseDate(aStartDate) || 0;
+                            bVal = parseDate(bStartDate) || 0;
+                            return aVal - bVal; // Ascending order for dates
                         default:
                             return 0;
                     }
@@ -687,6 +868,7 @@ try {
 
             function filterTable() {
                 const filterBy = filterSelect.value;
+                const selectedDate = dateFilter.value.trim();
                 const rows = tbody.querySelectorAll('tr');
 
                 rows.forEach(row => {
@@ -695,8 +877,12 @@ try {
                     const contribAccepted = row.dataset.contributedAccepted === '1';
                     const contribPending = row.dataset.contributedAccepted === 'null';
                     const contribRejected = row.dataset.contributedAccepted === '0';
+                    const startDate = row.dataset.startDate;
+                    const endDate = row.dataset.endDate;
+
                     let show = true;
 
+                    // Apply type filter
                     switch (filterBy) {
                         case 'flash':
                             show = flash; // Anyone with flash talk (includes both flash+contributed)
@@ -717,6 +903,11 @@ try {
                         default:
                             show = flash || contrib; // Any talk submission
                             break;
+                    }
+
+                    // Apply date filter if type filter passed and a date is selected
+                    if (show && selectedDate) {
+                        show = isDateInRange(startDate, endDate, selectedDate);
                     }
 
                     row.style.display = show ? '' : 'none';
@@ -852,7 +1043,7 @@ try {
                 const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
 
                 // CSV headers with UTF-8 BOM for Excel compatibility
-                const headers = ['Last Name', 'First Name', 'Email', 'Flash Talk', 'Contributed Talk', 'Title', 'Abstract', 'Contributed Status'];
+                const headers = ['Last Name', 'First Name', 'Email', 'Flash Talk', 'Contributed Talk', 'Title', 'Dates', 'Abstract', 'Contributed Status'];
                 let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
 
                 // CSV data
@@ -864,6 +1055,9 @@ try {
                     const flash = row.dataset.talkFlash === '1' ? 'Yes' : 'No';
                     const contributed = row.dataset.talkContributed === '1' ? 'Yes' : 'No';
                     const title = row.dataset.talkTitle || ''; // Get full title from data attribute
+                    const startDate = row.dataset.startDate || '';
+                    const endDate = row.dataset.endDate || '';
+                    const registrationDates = (startDate && endDate) ? `${startDate}-${endDate}` : '';
                     const abstract = row.dataset.talkAbstract || ''; // Get full abstract from data attribute
 
                     // Determine contributed status (flash talks are always accepted)
@@ -898,6 +1092,7 @@ try {
                         flash,
                         contributed,
                         escapeCSV(title),
+                        escapeCSV(registrationDates),
                         escapeCSV(abstract),
                         escapeCSV(acceptedStatus)
                     ];
@@ -956,6 +1151,9 @@ try {
             filterSelect.addEventListener('change', filterTable);
             adminModeCheckbox.addEventListener('change', toggleAdminMode);
 
+            // Date filter event listener
+            dateFilter.addEventListener('change', filterTable);
+
             // Admin select change handlers - auto-save on change
             tbody.addEventListener('change', function(event) {
                 if (event.target.classList.contains('admin-select')) {
@@ -975,6 +1173,7 @@ try {
             }
 
             // Initial setup
+            populateDateFilter();
             sortTable();
             toggleAdminMode();
         });
