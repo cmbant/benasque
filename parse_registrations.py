@@ -24,7 +24,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
 
@@ -57,7 +57,6 @@ class RegistrationParser:
     def _parse_html_content(self, html_content: str) -> List[Dict]:
         """Parse HTML content and extract participant data."""
         soup = BeautifulSoup(html_content, 'html.parser')
-        participants = []
 
         # Check if this is a browser-saved HTML file with embedded content
         if self._is_browser_saved_html(soup):

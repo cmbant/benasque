@@ -45,7 +45,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submitted Talks - Benasque 25</title>
+    <title>Submitted Talks</title>
     <link rel="stylesheet" href="css/style.css?v=2">
     <style>
         .talks-container {
@@ -708,16 +708,9 @@ try {
         function isDateInRange(startDate, endDate, filterDate) {
             if (!startDate || !endDate || !filterDate) return false;
 
-            // Normalize all dates to ensure consistent comparison
-            const normalizedStart = normalizeDate(startDate);
-            const normalizedEnd = normalizeDate(endDate);
-            const normalizedFilter = normalizeDate(filterDate);
-
-            if (!normalizedStart || !normalizedEnd || !normalizedFilter) return false;
-
-            const start = parseDate(normalizedStart);
-            const end = parseDate(normalizedEnd);
-            const filter = parseDate(normalizedFilter);
+            const start = parseDate(startDate);
+            const end = parseDate(endDate);
+            const filter = parseDate(filterDate);
 
             if (!start || !end || !filter) return false;
 

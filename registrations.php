@@ -224,7 +224,7 @@ try {
                 <div class="info">
                     <strong>No registration data found.</strong><br>
                     Use the Python script to parse and import registration data:<br>
-                    <code>uv run parse_registrations.py orgaccept.pl.html --update-remote --url <?= htmlspecialchars($_SERVER['HTTP_HOST']) ?></code>
+                    <code>uv run parse_registrations.py orgaccept.pl.html --update-remote --url https://<?= htmlspecialchars($_SERVER['HTTP_HOST']) ?></code>
                 </div>
             <?php else: ?>
 

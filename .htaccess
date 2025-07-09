@@ -1,6 +1,6 @@
 RewriteEngine On
 
 
-<FilesMatch "^\.htaccess|^\.(?!well-known)|.*\.(git|env|log|ini|conf|config|bak|backup|old|tmp|temp|md|ps1|py)$">
+<FilesMatch "^\.htaccess|^\.(?!well-known)|.*\.(git|env|db|log|ini|conf|config|bak|backup|old|tmp|temp|md|ps1|py)$">
     Require all denied
 </FilesMatch>

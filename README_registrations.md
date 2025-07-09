@@ -186,36 +186,6 @@ The parser handles various encoding issues and malformed HTML gracefully:
 - Validates email formats
 - Reports errors without stopping the entire process
 
-## Troubleshooting
-
-### Common Issues
-
-1. **"Registrations table does not exist"**
-   - Run `php migrate_registrations.php` first
-
-2. **"Could not decode file"**
-   - Check that the HTML file is not corrupted
-   - Try saving the HTML file with UTF-8 encoding
-
-3. **"No participants found"** - Most common issue
-   - **SOLUTION**: Use "View Source" instead of "Save As"
-   - In your browser, right-click on the orgaccept.pl page
-   - Select "View Page Source" or "View Source"
-   - Copy all the source code and save it as a .html file
-   - The default browser "Save As" creates a processed version that cannot be parsed
-
-4. **Network errors when updating remote**
-   - Check the URL is correct and accessible
-   - Ensure the web server is running
-   - Verify API endpoint exists
-
-### Debug Mode
-
-Use verbose output to see what the parser is finding:
-```bash
-uv run parse_registrations.py orgaccept.pl.html --verbose
-```
-
 ## Integration with Existing System
 
 This registration system is designed to work alongside the existing participant database. The registration data is stored in a separate table and can be cross-referenced with the main participants table using email addresses.
