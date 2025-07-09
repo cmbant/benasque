@@ -157,7 +157,13 @@ try {
                                             <strong>Recent Papers:</strong>
                                             <ul>
                                                 <?php foreach ($validLinks as $link): ?>
-                                                    <li><a href="<?= htmlspecialchars($link['url']) ?>" target="_blank" class="arxiv-title"><?= $link['title'] ?></a></li>
+                                                    <?php
+                                                    // Replace -- and --- with proper Unicode em-dashes for better typography
+                                                    $title = $link['title'];
+                                                    $title = str_replace('---', '—', $title); // Replace triple dash with em-dash
+                                                    $title = str_replace('--', '—', $title);  // Replace double dash with em-dash
+                                                    ?>
+                                                    <li><a href="<?= htmlspecialchars($link['url']) ?>" target="_blank" class="arxiv-title"><?= $title ?></a></li>
                                                 <?php endforeach; ?>
                                             </ul>
                                         </div>

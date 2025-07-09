@@ -304,10 +304,22 @@ header h1 {
 
 .arxiv-links ul {
     list-style: none;
+    padding-left: 0;
 }
 
 .arxiv-links li {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.arxiv-links li:before {
+    content: "•";
+    color: #080d25;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    top: 0;
 }
 
 .arxiv-links a {
