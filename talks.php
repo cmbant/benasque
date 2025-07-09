@@ -851,9 +851,9 @@ try {
             function downloadCsv() {
                 const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.style.display !== 'none');
 
-                // CSV headers
+                // CSV headers with UTF-8 BOM for Excel compatibility
                 const headers = ['Last Name', 'First Name', 'Email', 'Flash Talk', 'Contributed Talk', 'Title', 'Abstract', 'Contributed Status'];
-                let csvContent = headers.join(',') + '\n';
+                let csvContent = '\uFEFF' + headers.join(',') + '\n'; // Add BOM for UTF-8
 
                 // CSV data
                 rows.forEach(row => {

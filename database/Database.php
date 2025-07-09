@@ -188,7 +188,7 @@ class Database
 
     public function getAllRegistrations()
     {
-        $stmt = $this->pdo->query("SELECT * FROM registrations ORDER BY status, name");
+        $stmt = $this->pdo->query("SELECT * FROM registrations ORDER BY status, last_name, first_name");
         return $stmt->fetchAll();
     }
 

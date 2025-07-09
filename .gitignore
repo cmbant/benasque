@@ -1,5 +1,6 @@
 # Configuration files
 config.php
+*.json
 
 # Database files
 database/benasque25.db

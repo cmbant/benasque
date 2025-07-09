@@ -140,7 +140,7 @@ class RegistrationManager
     {
         $stmt = $this->pdo->query("
             SELECT * FROM registrations
-            ORDER BY status, name
+            ORDER BY status, last_name, first_name
         ");
         return $stmt->fetchAll();
     }
