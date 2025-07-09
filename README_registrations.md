@@ -1,6 +1,6 @@
-# Benasque Registration Parser
+# Registration Parser
 
-This tool parses HTML files from the Benasque conference registration system (orgaccept.pl) and extracts participant registration data including status (ACC/VIP/CANC), names, emails, affiliations, and attendance dates.
+This tool parses HTML files from the conference registration system (orgaccept.pl) and extracts participant registration data including status (ACC/VIP/CANC), names, emails, affiliations, and attendance dates.
 
 ## Features
 
@@ -28,16 +28,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 2. The script includes dependencies in the header and will automatically install them when run with `uv run`
-
-3. Test the setup:
-```bash
-uv run test_registration_parser.py
-```
-
-4. Run the example:
-```bash
-uv run example_usage.py
-```
 
 ### Web Database Setup
 
@@ -189,6 +179,12 @@ The parser handles various encoding issues and malformed HTML gracefully:
 ## Integration with Existing System
 
 This registration system is designed to work alongside the existing participant database. The registration data is stored in a separate table and can be cross-referenced with the main participants table using email addresses.
+
+The main participant directory automatically integrates registration dates for date-based filtering:
+- **Week filters**: Show participants present during specific weeks
+- **Only Week filters**: Show participants present exclusively in one week
+- **Individual day filters**: Show participants present on specific dates
+- **No dates**: Participants without registration dates appear in all week/day filters
 
 To link registration status with participant profiles, you can join the tables:
 

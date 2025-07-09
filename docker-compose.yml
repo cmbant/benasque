@@ -1,7 +1,7 @@
 services:
   web:
     image: php:8.1-apache
-    container_name: benasque25-web
+    container_name: conference-web
     ports:
       - "8080:80"
     volumes:

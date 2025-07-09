@@ -8,8 +8,11 @@ class Database
     public function __construct($dbPath = null)
     {
         if ($dbPath === null) {
-            // Use __DIR__ for reliable path resolution
-            $this->dbPath = __DIR__ . '/benasque25.db';
+            // Load configuration to get database name
+            $config = require dirname(__DIR__) . '/config.php';
+
+            $dbName = $config['database_name'];
+            $this->dbPath = __DIR__ . '/' . $dbName . '.db';
         } else {
             $this->dbPath = $dbPath;
         }

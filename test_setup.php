@@ -1,7 +1,7 @@
 <?php
 // Test script to verify the setup is working correctly
 
-echo "<h1>Benasque 25 Setup Test</h1>";
+echo "<h1>Conference Setup Test</h1>";
 
 // Test 1: Check PHP version
 echo "<h2>PHP Version</h2>";

@@ -1,6 +1,9 @@
 <?php
 require_once 'database/Database.php';
 
+// Load configuration
+$config = require 'config.php';
+
 // Helper functions for talk status display
 function getStatusClass($status)
 {
@@ -46,7 +49,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Submitted Talks</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?<?= htmlspecialchars($config['cache_version']) ?>">
     <style>
         .talks-container {
             max-width: 1200px;

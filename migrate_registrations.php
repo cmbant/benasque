@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Migration script to add registrations table for Benasque conference
+ * Migration script to add registrations table for conference
  *
  * This script adds a new table to store registration status data
  * parsed from the orgaccept.pl HTML files.

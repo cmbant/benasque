@@ -1,4 +1,4 @@
-# Benasque 25 Conference Participant Directory
+# Conference Participant Directory
 
 A web application for conference participants to share their information and submit talk proposals.
 
@@ -9,7 +9,8 @@ A web application for conference participants to share their information and sub
 ### Participant Directory
 - Participant profiles with photos, research interests, and arXiv links
 - Add/Edit functionality with local storage validation
-- Sorting by name and filtering by interests
+- Sorting by name and filtering by interests and dates
+- Date-based filtering (weekly and daily) with registration integration
 - Image upload with automatic resizing
 - Direct signup links for easy registration
 
@@ -51,6 +52,7 @@ Both automatically open the registration form.
 ### Admin Features
 
 - **Talks Management**: Access `talks.php` to review and approve contributed talk submissions
+- **Registration Management**: Access `registrations.php` to view participant registration dates and status
 
 ## Deployment
 

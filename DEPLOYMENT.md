@@ -1,4 +1,4 @@
-# Deployment Guide for Benasque 25 Conference Website
+# Deployment Guide for Conference Website
 
 ## Local Testing with Docker
 
@@ -16,6 +16,7 @@
    - Setup test: http://localhost:8080/test_setup.php
    - Direct signup: http://localhost:8080/?signup=1
    - Talks management: http://localhost:8080/talks.php
+   - Registration management: http://localhost:8080/registrations.php
 
 4. **Stop the application**
    ```bash
@@ -61,7 +62,7 @@
 your-domain.com/
 ├── index.php                    # Main participant directory
 ├── talks.php                    # Admin interface for talk management
-
+├── registrations.php            # Admin interface for registration management
 ├── test_setup.php              # Setup verification (remove after testing)
 ├── config.php                  # Configuration file
 ├── .htaccess                   # Apache configuration
@@ -76,7 +77,7 @@ your-domain.com/
 ├── database/
 │   ├── Database.php           # Database class
 │   ├── init.sql              # Database schema
-│   └── benasque25.db         # SQLite database (created automatically)
+│   └── *.db                  # SQLite database (created automatically)
 ├── utils/
 │   └── ArxivAPI.php          # ArXiv integration for paper titles
 └── uploads/                  # User uploaded photos
@@ -100,7 +101,7 @@ your-domain.com/
 ### Backup Strategy
 
 1. **Database backup:**
-   - Download `database/benasque25.db` regularly
+   - Download the database file from `database/` directory regularly
    - This contains all participant data
 
 2. **Image backup:**
@@ -111,16 +112,23 @@ your-domain.com/
 
 Edit these values in the relevant files if needed:
 
+**Conference dates** (in `config.php`):
+- `conference_start_date`: Start date for week calculations (e.g., 'YYYY-MM-DD')
+- `conference_end_date`: End date for filtering (e.g., 'YYYY-MM-DD')
+
+**System settings** (in `config.php`):
+- `database_name`: Database file name without .db extension (e.g., 'benasque25')
+- `cache_version`: Cache-busting parameter for CSS/JS files (e.g., 'v3')
+- `local_storage_prefix`: Prefix for localStorage keys (e.g., 'benasque25')
+
 **Image upload limits** (set in PHP configuration):
 - `upload_max_filesize`: Maximum file size
 - `post_max_size`: Maximum POST data size
 - Contact hosting provider to adjust these limits if needed
 
-**Image resize dimensions** (in `api/save_participant.php`):
-- `$maxWidth` and `$maxHeight` in the `resizeImage()` function
-
-**Database location** (in `database/Database.php`):
-- Change the `$dbPath` parameter if needed
+**Image resize dimensions** (in `config.php`):
+- `photo_max_width`: Maximum width for resized photos
+- `photo_max_height`: Maximum height for resized photos
 
 ## Talk Management Features
 

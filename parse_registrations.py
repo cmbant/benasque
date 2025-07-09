@@ -8,7 +8,7 @@
 # ]
 # ///
 """
-Benasque Registration Parser
+Registration Parser
 
 Parses HTML file from orgaccept.pl to extract participant registration data.
 Supports local parsing and remote database updates via web API.
@@ -30,7 +30,7 @@ from bs4 import BeautifulSoup
 
 
 class RegistrationParser:
-    """Parser for Benasque registration HTML files."""
+    """Parser for registration HTML files."""
 
     def __init__(self):
         self.current_year = datetime.now().year
@@ -242,7 +242,7 @@ class RegistrationParser:
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Parse Benasque registration HTML file')
+    parser = argparse.ArgumentParser(description='Parse registration HTML file')
     parser.add_argument('html_file', help='Path to the HTML file to parse')
     parser.add_argument('--output', '-o', help='Output JSON file (default: registrations.json)',
                        default='registrations.json')

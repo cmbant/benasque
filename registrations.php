@@ -8,6 +8,9 @@
 
 require_once 'database/Database.php';
 
+// Load configuration
+$config = require 'config.php';
+
 try {
     $db = new Database();
     $pdo = $db->getPDO();
@@ -48,7 +51,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration Status - Benasque Conference</title>
+    <title>Registration Status - <?= htmlspecialchars($config['conference_name'] ?? 'Conference') ?></title>
     <style>
         body {
             font-family: Arial, sans-serif;

@@ -2,7 +2,7 @@
 require_once 'database/Database.php';
 
 // Load configuration
-$config = file_exists('config.php') ? require 'config.php' : require 'config.sample.php';
+$config = require 'config.php';
 
 try {
     $db = new Database();
@@ -21,7 +21,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($config['page_title']) ?></title>
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?<?= htmlspecialchars($config['cache_version']) ?>">
 </head>
 
 <body>
@@ -51,7 +51,9 @@ try {
                     </select>
                 </div>
                 <div class="filter-controls">
-                    <label>Filter by interests:</label>
+                    <select id="dateFilter">
+                        <option value="">All dates</option>
+                    </select>
                     <select id="interestFilter">
                         <option value="">All interests</option>
                         <?php foreach ($allInterests as $interest): ?>
@@ -71,7 +73,9 @@ try {
                     <div class="participant-card"
                         data-first-name="<?= htmlspecialchars($participant['first_name']) ?>"
                         data-last-name="<?= htmlspecialchars($participant['last_name']) ?>"
-                        data-interests="<?= htmlspecialchars($participant['interests']) ?>">
+                        data-interests="<?= htmlspecialchars($participant['interests'] ?? '') ?>"
+                        data-start-date="<?= htmlspecialchars($participant['start_date'] ?? '') ?>"
+                        data-end-date="<?= htmlspecialchars($participant['end_date'] ?? '') ?>">
 
                         <div class="participant-photo">
                             <?php if ($participant['photo_path']): ?>
@@ -288,7 +292,15 @@ try {
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script>
+        // Pass configuration to JavaScript
+        window.conferenceConfig = {
+            startDate: <?= json_encode($config['conference_start_date']) ?>,
+            endDate: <?= json_encode($config['conference_end_date']) ?>,
+            localStoragePrefix: <?= json_encode($config['local_storage_prefix']) ?>
+        };
+    </script>
+    <script src="js/app.js?<?= htmlspecialchars($config['cache_version']) ?>"></script>
 </body>
 
 </html>

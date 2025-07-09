@@ -3,8 +3,8 @@ config.php
 *.json
 
 # Database files
-database/benasque25.db
-database/benasque25.db-journal
+database/*.db
+database/*.db-journal
 
 # Uploaded files
 uploads/*

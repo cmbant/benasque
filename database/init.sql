@@ -1,4 +1,4 @@
--- Benasque 25 Conference Participant Database Schema
+-- Conference Participant Database Schema
 
 CREATE TABLE IF NOT EXISTS participants (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
