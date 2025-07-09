@@ -157,7 +157,7 @@ try {
                                             <strong>Recent Papers:</strong>
                                             <ul>
                                                 <?php foreach ($validLinks as $link): ?>
-                                                    <li><a href="<?= htmlspecialchars($link['url']) ?>" target="_blank"><?= htmlspecialchars($link['title']) ?></a></li>
+                                                    <li><a href="<?= htmlspecialchars($link['url']) ?>" target="_blank" class="arxiv-title"><?= $link['title'] ?></a></li>
                                                 <?php endforeach; ?>
                                             </ul>
                                         </div>
@@ -230,7 +230,7 @@ try {
 
                 <div class="form-group">
                     <label for="description">General info</label>
-                    <textarea id="description" name="description" rows="3" placeholder="Tell us about your research, background, or anything else you'd like to share..."></textarea>
+                    <textarea id="description" name="description" rows="3" maxlength="1000" placeholder="Tell us about your research, background, or anything else you'd like to share..."></textarea>
                 </div>
 
                 <div class="form-group">
@@ -291,6 +291,27 @@ try {
             </form>
         </div>
     </div>
+
+    <!-- MathJax for LaTeX rendering in arXiv titles -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ],
+                displayMath: [
+                    ['$$', '$$'],
+                    ['\\[', '\\]']
+                ]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+            }
+        };
+    </script>
 
     <script>
         // Pass configuration to JavaScript

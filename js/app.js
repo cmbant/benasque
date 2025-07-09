@@ -967,4 +967,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check for signup parameter
     checkSignupParam();
+
+    // Initialize MathJax rendering for arXiv titles
+    initializeMathJax();
 });
+
+// Function to render MathJax in arXiv titles
+function initializeMathJax() {
+    // Wait for MathJax to be loaded
+    if (typeof window.MathJax !== 'undefined' && window.MathJax.typesetPromise) {
+        // Render LaTeX in arXiv titles
+        window.MathJax.typesetPromise().then(() => {
+            console.log('MathJax rendering complete');
+        }).catch((err) => {
+            console.log('MathJax rendering error:', err);
+        });
+    } else {
+        // If MathJax isn't loaded yet, wait and try again
+        setTimeout(initializeMathJax, 100);
+    }
+}
