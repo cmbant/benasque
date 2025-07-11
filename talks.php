@@ -27,7 +27,7 @@ try {
     $profileCount = $countStmt->fetch()['profile_count'];
 
     // Get all participants who have submitted talks with registration dates
-    $sql = "SELECT p.rowid, p.first_name, p.last_name, p.email, p.talk_flash, p.talk_contributed, p.talk_title, p.talk_abstract,
+    $sql = "SELECT p.rowid as participant_id, p.first_name, p.last_name, p.email, p.talk_flash, p.talk_contributed, p.talk_title, p.talk_abstract,
                    p.talk_flash_accepted, p.talk_contributed_accepted,
                    r.start_date, r.end_date
             FROM participants p
@@ -571,7 +571,7 @@ try {
                                 data-talk-abstract="<?= htmlspecialchars($talk['talk_abstract'] ?: '') ?>"
                                 data-start-date="<?= htmlspecialchars($talk['start_date'] ?: '') ?>"
                                 data-end-date="<?= htmlspecialchars($talk['end_date'] ?: '') ?>"
-                                data-rowid="<?= $talk['rowid'] ?>">
+                                data-rowid="<?= $talk['participant_id'] ?>">
                                 <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></a></td>
                                 <td>
                                     <?php if ($talk['talk_flash']): ?>
