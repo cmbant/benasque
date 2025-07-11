@@ -27,7 +27,7 @@ try {
     $profileCount = $countStmt->fetch()['profile_count'];
 
     // Get all participants who have submitted talks with registration dates
-    $sql = "SELECT p.first_name, p.last_name, p.email, p.talk_flash, p.talk_contributed, p.talk_title, p.talk_abstract,
+    $sql = "SELECT p.rowid, p.first_name, p.last_name, p.email, p.talk_flash, p.talk_contributed, p.talk_title, p.talk_abstract,
                    p.talk_flash_accepted, p.talk_contributed_accepted,
                    r.start_date, r.end_date
             FROM participants p
@@ -516,6 +516,7 @@ try {
                         <option value="name">Name (Last, First)</option>
                         <option value="type">Talk Type</option>
                         <option value="title">Talk Title</option>
+                        <option value="date_added">Date Added</option>
                     </select>
 
                     <label for="talksFilterSelect" class="sr-only">Filter by talk type</label>
@@ -569,7 +570,8 @@ try {
                                 data-talk-title="<?= htmlspecialchars($talk['talk_title'] ?: '') ?>"
                                 data-talk-abstract="<?= htmlspecialchars($talk['talk_abstract'] ?: '') ?>"
                                 data-start-date="<?= htmlspecialchars($talk['start_date'] ?: '') ?>"
-                                data-end-date="<?= htmlspecialchars($talk['end_date'] ?: '') ?>">
+                                data-end-date="<?= htmlspecialchars($talk['end_date'] ?: '') ?>"
+                                data-rowid="<?= $talk['rowid'] ?>">
                                 <td><a href="mailto:<?= htmlspecialchars($talk['email']) ?>"><?= htmlspecialchars($talk['last_name'] . ', ' . $talk['first_name']) ?></a></td>
                                 <td>
                                     <?php if ($talk['talk_flash']): ?>
@@ -850,6 +852,11 @@ try {
                             aVal = parseDate(aStartDate) || 0;
                             bVal = parseDate(bStartDate) || 0;
                             return aVal - bVal; // Ascending order for dates
+                        case 'date_added':
+                            // Sort by row ID (date added) - ascending order (oldest first)
+                            aVal = parseInt(a.dataset.rowid) || 0;
+                            bVal = parseInt(b.dataset.rowid) || 0;
+                            return aVal - bVal; // Ascending order for date added
                         default:
                             return 0;
                     }
