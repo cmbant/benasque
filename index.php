@@ -43,7 +43,7 @@ try {
         <div id="participantsContent" class="tab-content active">
             <div class="controls">
                 <div class="sort-controls">
-                    <label>Sort by:</label>
+                    <label for="sortSelect">Sort by:</label>
                     <select id="sortSelect">
                         <option value="random" selected>Random</option>
                         <option value="first_name">First Name</option>
@@ -51,16 +51,19 @@ try {
                     </select>
                 </div>
                 <div class="filter-controls">
+                    <label for="dateFilter" class="sr-only">Filter by date</label>
                     <select id="dateFilter">
                         <option value="">All dates</option>
                     </select>
+                    <label for="interestFilter" class="sr-only">Filter by interest</label>
                     <select id="interestFilter">
                         <option value="">All interests</option>
                         <?php foreach ($allInterests as $interest): ?>
                             <option value="<?= htmlspecialchars($interest) ?>"><?= htmlspecialchars($interest) ?></option>
                         <?php endforeach; ?>
                     </select>
-                    <input type="text" id="filterInput" placeholder="Or type keywords...">
+                    <label for="filterInput" class="sr-only">Search keywords</label>
+                    <input type="text" id="filterInput" placeholder="Or type keywords..." autocomplete="off">
                 </div>
             </div>
 
@@ -197,17 +200,17 @@ try {
             <form id="participantForm" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="firstName">First Name *</label>
-                    <input type="text" id="firstName" name="first_name" required>
+                    <input type="text" id="firstName" name="first_name" required autocomplete="given-name">
                 </div>
 
                 <div class="form-group">
                     <label for="lastName">Last Name *</label>
-                    <input type="text" id="lastName" name="last_name" required>
+                    <input type="text" id="lastName" name="last_name" required autocomplete="family-name">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email *</label>
-                    <input type="email" id="email" name="email" required>
+                    <input type="email" id="email" name="email" required autocomplete="email">
                     <div class="checkbox-group">
                         <input type="checkbox" id="emailPublic" name="email_public" value="1" checked>
                         <label for="emailPublic">Show on profile</label>
@@ -216,14 +219,14 @@ try {
                 </div>
 
                 <div class="form-group">
-                    <label for="interests">Research Interests</label>
+                    <label for="interestSearch">Research Interests</label>
                     <div class="multi-select-container">
-                        <div class="selected-tags" id="selectedTags"></div>
+                        <div class="selected-tags" id="selectedTags" aria-live="polite" aria-label="Selected research interests"></div>
                         <div class="combobox-wrapper">
-                            <input type="text" id="interestSearch" placeholder="Type to search and add keywords..." autocomplete="off">
-                            <div class="dropdown-list" id="interestDropdown">
+                            <input type="text" id="interestSearch" placeholder="Type to search and add keywords..." autocomplete="off" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-describedby="interestHelp">
+                            <div class="dropdown-list" id="interestDropdown" role="listbox" aria-label="Available research interests">
                                 <?php foreach ($allInterests as $interest): ?>
-                                    <div class="dropdown-item" data-value="<?= htmlspecialchars($interest) ?>">
+                                    <div class="dropdown-item" data-value="<?= htmlspecialchars($interest) ?>" role="option">
                                         <?= htmlspecialchars($interest) ?>
                                     </div>
                                 <?php endforeach; ?>
@@ -231,17 +234,17 @@ try {
                         </div>
                     </div>
                     <input type="hidden" id="interests" name="interests">
-                    <small>Click on suggestions or type new keywords. Selected keywords appear as tags above.</small>
+                    <small id="interestHelp">Click on suggestions or type new keywords. Selected keywords appear as tags above.</small>
                 </div>
 
                 <div class="form-group">
                     <label for="description">General info</label>
-                    <textarea id="description" name="description" rows="3" maxlength="1000" placeholder="Tell us about your research, background, or anything else you'd like to share..."></textarea>
+                    <textarea id="description" name="description" rows="3" maxlength="1000" placeholder="Tell us about your research, background, or anything else you'd like to share..." autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label for="arxivLinks">ArXiv Links (up to 3)</label>
-                    <textarea id="arxivLinks" name="arxiv_links" rows="3" placeholder="One arXiv URL per line"></textarea>
+                    <textarea id="arxivLinks" name="arxiv_links" rows="3" placeholder="One arXiv URL per line" autocomplete="off"></textarea>
                 </div>
 
                 <div class="form-group">
@@ -278,12 +281,12 @@ try {
                         <div id="contributedTalkDetails" class="contributed-talk-details" style="display: none;">
                             <div class="form-group">
                                 <label for="talkTitle">Talk Title</label>
-                                <input type="text" id="talkTitle" name="talk_title" placeholder="Enter your talk title">
+                                <input type="text" id="talkTitle" name="talk_title" placeholder="Enter your talk title" autocomplete="off">
                             </div>
 
                             <div class="form-group">
                                 <label for="talkAbstract">Short Abstract</label>
-                                <textarea id="talkAbstract" name="talk_abstract" rows="4" placeholder="Enter a short abstract for your talk"></textarea>
+                                <textarea id="talkAbstract" name="talk_abstract" rows="4" placeholder="Enter a short abstract for your talk" autocomplete="off"></textarea>
                             </div>
                         </div>
                     </div>

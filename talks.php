@@ -511,14 +511,15 @@ try {
         <?php if (!empty($talks)): ?>
             <div class="controls">
                 <div class="sort-controls">
-                    <label for="sortSelect">Sort by:</label>
-                    <select id="sortSelect">
+                    <label for="talksSortSelect">Sort by:</label>
+                    <select id="talksSortSelect">
                         <option value="name">Name (Last, First)</option>
                         <option value="type">Talk Type</option>
                         <option value="title">Talk Title</option>
                     </select>
 
-                    <select id="filterSelect">
+                    <label for="talksFilterSelect" class="sr-only">Filter by talk type</label>
+                    <select id="talksFilterSelect">
                         <option value="all">All Submissions</option>
                         <option value="flash">Flash Talks</option>
                         <option value="contributed">Contributed Talks</option>
@@ -527,7 +528,8 @@ try {
                         <option value="contrib-rejected">Contributed: Rejected</option>
                     </select>
 
-                    <select id="dateFilter">
+                    <label for="talksDateFilter" class="sr-only">Filter by date</label>
+                    <select id="talksDateFilter">
                         <option value="">All dates</option>
                     </select>
 
@@ -721,10 +723,10 @@ try {
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            const sortSelect = document.getElementById('sortSelect');
-            const filterSelect = document.getElementById('filterSelect');
+            const sortSelect = document.getElementById('talksSortSelect');
+            const filterSelect = document.getElementById('talksFilterSelect');
             const adminModeCheckbox = document.getElementById('adminMode');
-            const dateFilter = document.getElementById('dateFilter');
+            const dateFilter = document.getElementById('talksDateFilter');
 
             const table = document.getElementById('talksTable');
             const tbody = table ? table.querySelector('tbody') : null;

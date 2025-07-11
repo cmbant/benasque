@@ -271,7 +271,7 @@ try {
                     </select>
 
                     <label for="searchInput">Search:</label>
-                    <input type="text" id="searchInput" placeholder="Name, email, or affiliation..." onkeyup="filterTable()">
+                    <input type="text" id="searchInput" placeholder="Name, email, or affiliation..." onkeyup="filterTable()" autocomplete="off">
                 </div>
 
                 <!-- Registration Table -->

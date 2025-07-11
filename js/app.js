@@ -810,6 +810,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 blurTimeout = null;
             }
             dropdown.style.display = 'block';
+            searchInput.setAttribute('aria-expanded', 'true');
             filterDropdownItems();
         });
 
@@ -817,6 +818,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Delay hiding to allow clicking on dropdown items
             blurTimeout = setTimeout(() => {
                 dropdown.style.display = 'none';
+                searchInput.setAttribute('aria-expanded', 'false');
                 blurTimeout = null;
             }, 200);
         });
@@ -824,6 +826,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Filter dropdown items based on search
         searchInput.addEventListener('input', () => {
             dropdown.style.display = 'block';
+            searchInput.setAttribute('aria-expanded', 'true');
             filterDropdownItems();
         });
 
