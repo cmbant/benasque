@@ -853,10 +853,10 @@ try {
                             bVal = parseDate(bStartDate) || 0;
                             return aVal - bVal; // Ascending order for dates
                         case 'date_added':
-                            // Sort by row ID (date added) - ascending order (oldest first)
+                            // Sort by row ID (date added) - descending order (newest first)
                             aVal = parseInt(a.dataset.rowid) || 0;
                             bVal = parseInt(b.dataset.rowid) || 0;
-                            return aVal - bVal; // Ascending order for date added
+                            return bVal - aVal; // Descending order for date added (newest first)
                         default:
                             return 0;
                     }
