@@ -264,8 +264,8 @@ try {
                 </div>
 
                 <div class="form-group">
-                    <label>Talks</label>
-                    <div class="talks-section">
+                    <fieldset class="talks-section">
+                        <legend>Talks</legend>
                         <p class="info-text">There are flash talks (2+1 min) and a limited number of longer contributed talks (15+5 min). Please indicate the type(s) of talk you'd like to be considered for. If you select both, we'll consider your submission for a longer talk first, and flash talk as second choice.</p>
 
                         <div class="checkbox-group">
@@ -289,7 +289,7 @@ try {
                                 <textarea id="talkAbstract" name="talk_abstract" rows="4" placeholder="Enter a short abstract for your talk" autocomplete="off"></textarea>
                             </div>
                         </div>
-                    </div>
+                    </fieldset>
                 </div>
 
                 <div class="form-actions">
